@@ -51,9 +51,33 @@ uart:
 autoterm:
   uart_panel: panel
   uart_heater: heater
+  # refresh_ms: 30000
   # optional mqtt settings
   # timeout_ms: 20
   # buffer_size: 32
   # publish_topic: default to "${core.name}/autoterm"
   # subscribe_topic: default to "${core.name}/autoterm/cmd"
   # refresh_ms: 30000
+  # optional sensors
+  heater_temperature:
+    name: "Heater Temperature"
+  panel_temperature:
+    name: "Panel Temperature"
+  external_temperature:
+    name: "External Temperature"
+  battery_voltage:
+    name: "Battery Voltage"
+  temperature_setpoint:
+    name: "Temperature Setpoint"
+  power_level:
+    name: "Power Level"
+  operating_state:
+    name: "Operating State"
+  operating_mode:
+    name: "Operating Mode"
+  ventilation:
+    name: "Ventilation"
+
+sensor:
+
+text_sensor:
