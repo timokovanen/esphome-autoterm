@@ -259,22 +259,22 @@ bool AUTOTerm::verify_crc16_modbus_(const std::vector<uint8_t> &buf) {
 const char* AUTOTerm::state_to_string_(uint8_t state) {
   switch(state) {
     case STATE_OFF: return "off";
-    case 0x01: return "starting";
-    case STATE_RUNNING: return "running";
-    case 0x05: return "shutting_down";
-    case 0x06: return "testing";
-    case STATE_VENTILATION: return "ventilation";
-    default: return "unknown";
+    case STATE_STARTING: return "Starting";
+    case STATE_RUNNING: return "Running";
+    case STATE_SHUTTING_DOWN: return "Shutting down";
+    case STATE_TESTING: return "Testing";
+    case STATE_VENTILATION: return "Ventilation";
+    default: return "Unknown";
   }
 }
 
 const char* AUTOTerm::mode_to_string_(uint8_t mode) {
   switch(mode) {
-    case 0x01: return "heater_temp";
-    case 0x02: return "panel_temp";
-    case 0x03: return "external_temp";
-    case 0x04: return "power";
-    default: return "unknown";
+    case 0x01: return "Heater sensor";
+    case 0x02: return "Panel sensor";
+    case 0x03: return "External sensor";
+    case 0x04: return "Power";
+    default: return "Unknown";
   }
 }
 
@@ -282,7 +282,7 @@ const char* AUTOTerm::vent_to_string_(uint8_t vent) {
   switch(vent) {
     case 0x01: return "on";
     case 0x02: return "off";
-    default: return "unknown";
+    default: return "Unknown";
   }
 }
 

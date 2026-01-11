@@ -21,7 +21,10 @@ class AUTOTerm : public Component {
   static const uint8_t SENDER_PANEL = 0x03;
   static const uint8_t SENDER_HEATER = 0x04;
   static const uint8_t STATE_OFF = 0x00;
+  static const uint8_t STATE_STARTING = 0x01;
   static const uint8_t STATE_RUNNING = 0x04;
+  static const uint8_t STATE_SHUTTING_DOWN = 0x05;
+  static const uint8_t STATE_TESTING = 0x06;
   static const uint8_t STATE_VENTILATION = 0x08;
   static const uint8_t CMD_START = 0x01;
   static const uint8_t CMD_SET = 0x02;

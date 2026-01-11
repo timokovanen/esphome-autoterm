@@ -69,6 +69,7 @@ MQTT:
 
 TODO:
 
+* Get rid of magic numbers
 * Publish sensors
 * Integrate Home Assistant API
 
