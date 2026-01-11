@@ -72,7 +72,7 @@ class AUTOTerm : public Component {
   std::vector<uint8_t> buf_autoterm_to_heater_;
   uint32_t last_panel_rx_{0};
   uint32_t last_heater_rx_{0};
-  uint32_t last_mqtt_pub_{0};
+  uint32_t last_publish_{0};
   bool send_command_{false};
 
   // --- parsed state ---

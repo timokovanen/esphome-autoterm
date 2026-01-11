@@ -51,6 +51,7 @@ uart:
 autoterm:
   uart_panel: panel
   uart_heater: heater
+  # refresh_ms: 30000
   # optional mqtt settings
   # timeout_ms: 20
   # buffer_size: 32

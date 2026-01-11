@@ -169,7 +169,6 @@ void AUTOTerm::parse_message_(const std::vector<uint8_t> &buf) {
         if (this->autoterm_temperature_setpoint_ != buf[8]) { this->autoterm_temperature_setpoint_ = buf[8]; this->autoterm_data_changed_ = true;}
         if (this->autoterm_ventilation_ != buf[9]) { this->autoterm_ventilation_ = buf[9]; this->autoterm_data_changed_ = true;}
         if (this->autoterm_power_level_ != buf[10]) { this->autoterm_power_level_ = buf[10]; this->autoterm_data_changed_ = true;}
-        this->update_sensors_();
         break;
       case CMD_STATUS:
         if (buf.size() < 17) return; // message size
@@ -192,7 +191,6 @@ void AUTOTerm::parse_message_(const std::vector<uint8_t> &buf) {
         this->autoterm_external_temperature_ = buf[9]; // no forced mqtt refresh
         this->autoterm_battery_voltage_ = (static_cast<uint16_t>(buf[10]) << 8) | static_cast<uint16_t>(buf[11]); // no forced mqtt refresh
         if (this->autoterm_operating_state_ != buf[14]) { this->autoterm_operating_state_ = buf[14]; this->autoterm_data_changed_ = true;}
-        this->update_sensors_();
         break;
       case CMD_PANEL_TEMP_REPORT:
         if (buf.size() < 8) return; // message size
@@ -203,7 +201,6 @@ void AUTOTerm::parse_message_(const std::vector<uint8_t> &buf) {
         // 06 crc
         // 07 crc
         this->autoterm_panel_temperature_ = buf[5]; // no forced mqtt refresh
-        this->update_sensors_();
         break;
     }
   }
@@ -328,12 +325,15 @@ void AUTOTerm::loop() {
   this->maybe_flush_(buf_heater_to_panel_, uart_panel_, last_heater_rx_, "heater");
 #ifdef USE_MQTT
   this->subscribe_mqtt_();
-  if(((uint32_t)(now - this->last_mqtt_pub_) >= this->refresh_ms_) || this->autoterm_data_changed_) {
+#endif
+  if(((uint32_t)(now - this->last_publish_) >= this->refresh_ms_) || this->autoterm_data_changed_) {
+    this->update_sensors_();
+#ifdef USE_MQTT
     this->publish_mqtt_();
-    this->last_mqtt_pub_ = millis();
+#endif
+    this->last_publish_ = millis();
     this->autoterm_data_changed_ = false;
   }
-#endif
 }
 
 void AUTOTerm::dump_config(){
