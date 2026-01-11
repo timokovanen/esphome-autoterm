@@ -1,0 +1,59 @@
+
+esphome:
+  name: 'heater01'
+  friendly_name: 'Planar 44D (Air 4D) Controller'
+  platformio_options:
+    upload_speed: 115200
+
+esp32:
+  board: wt32-eth01
+  framework:
+    type: esp-idf
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk:
+    pin: GPIO0
+    mode: CLK_EXT_IN
+  phy_addr: 1
+  power_pin: GPIO16
+
+# logger:
+#   level: DEBUG
+  
+mqtt:
+  broker: 192.168.1.2
+
+# web_server:
+#   port: 80
+
+# api:
+
+ota:
+  - platform: esphome
+  # - platform: web_server
+
+external_components:
+  - source: components
+
+uart:
+  - id: panel
+    tx_pin: GPIO17
+    rx_pin: GPIO05
+    baud_rate: 2400
+  - id: heater
+    tx_pin: GPIO32
+    rx_pin: GPIO33
+    baud_rate: 2400
+
+autoterm:
+  uart_panel: panel
+  uart_heater: heater
+  # optional mqtt settings
+  # timeout_ms: 20
+  # buffer_size: 32
+  # publish_topic: default to "${core.name}/autoterm"
+  # subscribe_topic: default to "${core.name}/autoterm/cmd"
+  # refresh_ms: 30000
