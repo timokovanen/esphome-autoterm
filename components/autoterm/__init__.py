@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import uart
+from esphome.components import uart, sensor, text_sensor
 from esphome.const import CONF_ID
 from esphome.core import CORE
 
@@ -14,6 +14,15 @@ CONF_BUFFER_SIZE = "buffer_size"
 CONF_PUBLISH_TOPIC = "publish_topic"
 CONF_SUBSCRIBE_TOPIC = "subscribe_topic"
 CONF_REFRESH_MS = "refresh_ms"
+CONF_HEATER_TEMPERATURE = "heater_temperature"
+CONF_PANEL_TEMPERATURE = "panel_temperature"
+CONF_EXTERNAL_TEMPERATURE = "external_temperature"
+CONF_BATTERY_VOLTAGE = "battery_voltage"
+CONF_TEMPERATURE_SETPOINT = "temperature_setpoint"
+CONF_POWER_LEVEL = "power_level"
+CONF_OPERATING_STATE = "operating_state"
+CONF_OPERATING_MODE = "operating_mode"
+CONF_VENTILATION = "ventilation"
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(AUTOTerm),
@@ -24,6 +33,38 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_PUBLISH_TOPIC): cv.string,
     cv.Optional(CONF_SUBSCRIBE_TOPIC): cv.string,
     cv.Optional(CONF_REFRESH_MS, default=30000): cv.int_range(min=5000, max=60000),
+    cv.Optional(CONF_HEATER_TEMPERATURE): sensor.sensor_schema(
+        unit_of_measurement="°C",
+        accuracy_decimals=0,
+        device_class="temperature"
+    ),
+    cv.Optional(CONF_PANEL_TEMPERATURE): sensor.sensor_schema(
+        unit_of_measurement="°C",
+        accuracy_decimals=0,
+        device_class="temperature"
+    ),
+    cv.Optional(CONF_EXTERNAL_TEMPERATURE): sensor.sensor_schema(
+        unit_of_measurement="°C",
+        accuracy_decimals=0,
+        device_class="temperature"
+    ),
+    cv.Optional(CONF_BATTERY_VOLTAGE): sensor.sensor_schema(
+        unit_of_measurement="V",
+        accuracy_decimals=1,
+        device_class="voltage"
+    ),
+    cv.Optional(CONF_TEMPERATURE_SETPOINT): sensor.sensor_schema(
+        unit_of_measurement="°C",
+        accuracy_decimals=0,
+        device_class="temperature"
+    ),
+    cv.Optional(CONF_POWER_LEVEL): sensor.sensor_schema(
+        accuracy_decimals=0,
+        device_class="power_factor"
+    ),
+    cv.Optional(CONF_OPERATING_STATE): text_sensor.text_sensor_schema(),
+    cv.Optional(CONF_OPERATING_MODE): text_sensor.text_sensor_schema(),
+    cv.Optional(CONF_VENTILATION): text_sensor.text_sensor_schema(),
 })
 
 async def to_code(config):
@@ -40,3 +81,32 @@ async def to_code(config):
     subscribe_topic = config.get(CONF_SUBSCRIBE_TOPIC, f"{CORE.name}/autoterm/cmd")
     cg.add(var.set_subscribe_topic(cg.std_string(subscribe_topic)))
     cg.add(var.set_refresh_ms(config[CONF_REFRESH_MS]))
+
+    # Register sensors
+    if CONF_HEATER_TEMPERATURE in config:
+        sens = await sensor.new_sensor(config[CONF_HEATER_TEMPERATURE])
+        cg.add(var.set_heater_temperature_sensor(sens))
+    if CONF_PANEL_TEMPERATURE in config:
+        sens = await sensor.new_sensor(config[CONF_PANEL_TEMPERATURE])
+        cg.add(var.set_panel_temperature_sensor(sens))
+    if CONF_EXTERNAL_TEMPERATURE in config:
+        sens = await sensor.new_sensor(config[CONF_EXTERNAL_TEMPERATURE])
+        cg.add(var.set_external_temperature_sensor(sens))
+    if CONF_BATTERY_VOLTAGE in config:
+        sens = await sensor.new_sensor(config[CONF_BATTERY_VOLTAGE])
+        cg.add(var.set_battery_voltage_sensor(sens))
+    if CONF_TEMPERATURE_SETPOINT in config:
+        sens = await sensor.new_sensor(config[CONF_TEMPERATURE_SETPOINT])
+        cg.add(var.set_temperature_setpoint_sensor(sens))
+    if CONF_POWER_LEVEL in config:
+        sens = await sensor.new_sensor(config[CONF_POWER_LEVEL])
+        cg.add(var.set_power_level_sensor(sens))
+    if CONF_OPERATING_STATE in config:
+        sens = await text_sensor.new_text_sensor(config[CONF_OPERATING_STATE])
+        cg.add(var.set_operating_state_sensor(sens))
+    if CONF_OPERATING_MODE in config:
+        sens = await text_sensor.new_text_sensor(config[CONF_OPERATING_MODE])
+        cg.add(var.set_operating_mode_sensor(sens))
+    if CONF_VENTILATION in config:
+        sens = await text_sensor.new_text_sensor(config[CONF_VENTILATION])
+        cg.add(var.set_ventilation_sensor(sens))
