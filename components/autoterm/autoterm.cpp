@@ -278,11 +278,19 @@ const char* AUTOTerm::mode_to_string_(uint8_t mode) {
   }
 }
 
-const char* AUTOTerm::vent_to_string_(uint8_t vent) {
+// const char* AUTOTerm::vent_to_string_(uint8_t vent) {
+//   switch(vent) {
+//     case 0x01: return "on";
+//     case 0x02: return "off";
+//     default: return "Unknown";
+//   }
+// }
+
+bool AUTOTerm::vent_to_binary_(uint8_t vent) {
   switch(vent) {
-    case 0x01: return "on";
-    case 0x02: return "off";
-    default: return "Unknown";
+    case 0x01: return true;
+    // case 0x02: return false;
+    default: return false;
   }
 }
 
@@ -312,7 +320,8 @@ void AUTOTerm::update_sensors_() {
     operating_mode_sensor_->publish_state(mode_to_string_(autoterm_operating_mode_));
   }
   if (ventilation_sensor_) {
-    ventilation_sensor_->publish_state(vent_to_string_(autoterm_ventilation_));
+    // ventilation_sensor_->publish_state(vent_to_string_(autoterm_ventilation_));
+    ventilation_sensor_->publish_state(vent_to_binary_(autoterm_ventilation_));
   }
 }
 

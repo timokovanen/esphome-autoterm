@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import uart, sensor, text_sensor
+from esphome.components import uart, sensor, text_sensor, binary_sensor
 from esphome.const import CONF_ID
 from esphome.core import CORE
 
@@ -64,7 +64,8 @@ CONFIG_SCHEMA = cv.Schema({
     ),
     cv.Optional(CONF_OPERATING_STATE): text_sensor.text_sensor_schema(),
     cv.Optional(CONF_OPERATING_MODE): text_sensor.text_sensor_schema(),
-    cv.Optional(CONF_VENTILATION): text_sensor.text_sensor_schema(),
+    # cv.Optional(CONF_VENTILATION): text_sensor.text_sensor_schema(),
+    cv.Optional(CONF_VENTILATION): binary_sensor.binary_sensor_schema(),
 })
 
 async def to_code(config):
@@ -108,5 +109,6 @@ async def to_code(config):
         sens = await text_sensor.new_text_sensor(config[CONF_OPERATING_MODE])
         cg.add(var.set_operating_mode_sensor(sens))
     if CONF_VENTILATION in config:
-        sens = await text_sensor.new_text_sensor(config[CONF_VENTILATION])
+        # sens = await text_sensor.new_text_sensor(config[CONF_VENTILATION])
+        sens = await binary_sensor.new_binary_sensor(config[CONF_VENTILATION])
         cg.add(var.set_ventilation_sensor(sens))

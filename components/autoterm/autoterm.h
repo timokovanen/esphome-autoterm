@@ -3,11 +3,23 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
+
 #ifdef USE_MQTT
-#include "esphome/components/mqtt/mqtt_client.h"
+  #include "esphome/components/mqtt/mqtt_client.h"
 #endif
-#include "esphome/components/sensor/sensor.h"
-#include "esphome/components/text_sensor/text_sensor.h"
+
+#ifdef USE_SENSOR
+  #include "esphome/components/sensor/sensor.h"
+#endif
+
+#ifdef USE_TEXT_SENSOR
+  #include "esphome/components/text_sensor/text_sensor.h"
+#endif
+
+#ifdef USE_BINARY_SENSOR
+  #include "esphome/components/binary_sensor/binary_sensor.h"
+#endif
+
 #include <vector>
 #include <string>
 
@@ -50,7 +62,10 @@ class AUTOTerm : public Component {
   void set_power_level_sensor(sensor::Sensor *sensor) { power_level_sensor_ = sensor; }
   void set_operating_state_sensor(text_sensor::TextSensor *sensor) { operating_state_sensor_ = sensor; }
   void set_operating_mode_sensor(text_sensor::TextSensor *sensor) { operating_mode_sensor_ = sensor; }
-  void set_ventilation_sensor(text_sensor::TextSensor *sensor) { ventilation_sensor_ = sensor; }
+  // void set_ventilation_sensor(text_sensor::TextSensor *sensor) { ventilation_sensor_ = sensor; }
+  void set_ventilation_sensor(binary_sensor::BinarySensor *sensor) { ventilation_sensor_ = sensor; }
+
+
   void setup() override;
   void loop() override;
   void dump_config() override;
@@ -99,7 +114,8 @@ class AUTOTerm : public Component {
   sensor::Sensor *power_level_sensor_{nullptr};
   text_sensor::TextSensor *operating_state_sensor_{nullptr};
   text_sensor::TextSensor *operating_mode_sensor_{nullptr};
-  text_sensor::TextSensor *ventilation_sensor_{nullptr};
+  // text_sensor::TextSensor *ventilation_sensor_{nullptr};
+  binary_sensor::BinarySensor *ventilation_sensor_{nullptr};
 
   // --- helpers ---
   void read_from_(uart::UARTComponent *src, std::vector<uint8_t> &buf, uint32_t &last_rx);
@@ -116,7 +132,8 @@ class AUTOTerm : public Component {
   void update_sensors_();
   const char* state_to_string_(uint8_t state);
   const char* mode_to_string_(uint8_t mode);
-  const char* vent_to_string_(uint8_t vent);
+  // const char* vent_to_string_(uint8_t vent);
+  bool vent_to_binary_(uint8_t vent);
   static const char *const TAG;
 };
 

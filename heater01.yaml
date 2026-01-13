@@ -80,4 +80,8 @@ autoterm:
 
 sensor:
 
+binary_sensor:
+
 text_sensor:
+
+# lisää koodiin ifdef sensors jne
