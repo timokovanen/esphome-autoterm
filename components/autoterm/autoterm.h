@@ -5,20 +5,25 @@
 #include "esphome/components/uart/uart.h"
 
 #ifdef USE_MQTT
-  #include "esphome/components/mqtt/mqtt_client.h"
+#include "esphome/components/mqtt/mqtt_client.h"
 #endif
 
 #ifdef USE_SENSOR
-  #include "esphome/components/sensor/sensor.h"
+#include "esphome/components/sensor/sensor.h"
 #endif
 
 #ifdef USE_TEXT_SENSOR
-  #include "esphome/components/text_sensor/text_sensor.h"
+#include "esphome/components/text_sensor/text_sensor.h"
 #endif
 
 #ifdef USE_BINARY_SENSOR
-  #include "esphome/components/binary_sensor/binary_sensor.h"
+#include "esphome/components/binary_sensor/binary_sensor.h"
 #endif
+
+#ifdef USE_SWITCH
+#include "esphome/components/switch/switch.h"
+#endif
+
 
 #include <vector>
 #include <string>
@@ -106,16 +111,24 @@ class AUTOTerm : public Component {
   int8_t autoterm_external_temperature_{0}; // external temp sensor
 
   // --- sensors ---
+#ifdef USE_SENSOR
   sensor::Sensor *heater_temperature_sensor_{nullptr};
   sensor::Sensor *panel_temperature_sensor_{nullptr};
   sensor::Sensor *external_temperature_sensor_{nullptr};
   sensor::Sensor *battery_voltage_sensor_{nullptr};
   sensor::Sensor *temperature_setpoint_sensor_{nullptr};
   sensor::Sensor *power_level_sensor_{nullptr};
+#endif
+#ifdef USE_TEXT_SENSOR
   text_sensor::TextSensor *operating_state_sensor_{nullptr};
   text_sensor::TextSensor *operating_mode_sensor_{nullptr};
   // text_sensor::TextSensor *ventilation_sensor_{nullptr};
+#endif
+#ifdef USE_BINARY_SENSOR
   binary_sensor::BinarySensor *ventilation_sensor_{nullptr};
+#endif
+  // --- switches ---
+
 
   // --- helpers ---
   void read_from_(uart::UARTComponent *src, std::vector<uint8_t> &buf, uint32_t &last_rx);
@@ -129,11 +142,17 @@ class AUTOTerm : public Component {
   void parse_message_(const std::vector<uint8_t> &buf);
   uint16_t crc16_modbus_(const uint8_t* data, size_t len);
   bool verify_crc16_modbus_(const std::vector<uint8_t> &buf);
+#ifdef USE_SENSOR
   void update_sensors_();
+#endif
+#ifdef USE_TEXT_SENSOR
   const char* state_to_string_(uint8_t state);
   const char* mode_to_string_(uint8_t mode);
   // const char* vent_to_string_(uint8_t vent);
+#endif
+#ifdef USE_BINARY_SENSOR
   bool vent_to_binary_(uint8_t vent);
+#endif
   static const char *const TAG;
 };
 

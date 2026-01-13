@@ -256,6 +256,7 @@ bool AUTOTerm::verify_crc16_modbus_(const std::vector<uint8_t> &buf) {
     return computed == received;
 }
 
+#ifdef USE_TEXT_SENSOR
 const char* AUTOTerm::state_to_string_(uint8_t state) {
   switch(state) {
     case STATE_OFF: return "off";
@@ -285,7 +286,9 @@ const char* AUTOTerm::mode_to_string_(uint8_t mode) {
 //     default: return "Unknown";
 //   }
 // }
+#endif
 
+#ifdef USE_BINARY_SENSOR
 bool AUTOTerm::vent_to_binary_(uint8_t vent) {
   switch(vent) {
     case 0x01: return true;
@@ -293,7 +296,9 @@ bool AUTOTerm::vent_to_binary_(uint8_t vent) {
     default: return false;
   }
 }
+#endif
 
+#ifdef USE_SENSOR
 void AUTOTerm::update_sensors_() {
   if (heater_temperature_sensor_) {
     heater_temperature_sensor_->publish_state(autoterm_heater_temperature_);
@@ -313,17 +318,22 @@ void AUTOTerm::update_sensors_() {
   if (power_level_sensor_) {
     power_level_sensor_->publish_state(autoterm_power_level_);
   }
+#ifdef USE_TEXT_SENSOR
   if (operating_state_sensor_) {
     operating_state_sensor_->publish_state(state_to_string_(autoterm_operating_state_));
   }
   if (operating_mode_sensor_) {
     operating_mode_sensor_->publish_state(mode_to_string_(autoterm_operating_mode_));
   }
+#endif
+#ifdef USE_BINARY_SENSOR
   if (ventilation_sensor_) {
     // ventilation_sensor_->publish_state(vent_to_string_(autoterm_ventilation_));
     ventilation_sensor_->publish_state(vent_to_binary_(autoterm_ventilation_));
   }
+#endif
 }
+#endif
 
 void AUTOTerm::loop() {
   uint32_t now = millis();
@@ -336,7 +346,9 @@ void AUTOTerm::loop() {
   this->subscribe_mqtt_();
 #endif
   if(((uint32_t)(now - this->last_publish_) >= this->refresh_ms_) || this->autoterm_data_changed_) {
+#ifdef USE_SENSOR
     this->update_sensors_();
+#endif
 #ifdef USE_MQTT
     this->publish_mqtt_();
 #endif
