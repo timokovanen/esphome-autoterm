@@ -69,15 +69,15 @@ autoterm:
     name: "Battery Voltage"
   temperature_setpoint:
     name: "Temperature Setpoint"
+    mode: box
   power_level:
     name: "Power Level"
+    mode: slider
   operating_state:
     name: "Operating State"
   operating_mode:
     name: "Operating Mode"
   ventilation:
     name: "Ventilation"
-
-sensor:
 
 text_sensor:
