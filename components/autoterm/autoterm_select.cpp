@@ -9,7 +9,7 @@ const char *const ModeSelect::TAG = "autoterm.mode";
   // Handle selection from Home Assistant / API
   void ModeSelect::control(const std::string &value){
     // Validate and apply
-    if (value == "Off" || value == "Starting" || value == "On" || value == "Shutting down") {
+    if (value == "By Heater" || value == "By Panel" || value == "By External" || value == "By Power") {
       // TODO: call into your device logic if needed, e.g.:
       // if (this->parent_) this->parent_->request_state(value);
       this->publish_state(value);

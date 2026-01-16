@@ -277,10 +277,10 @@ const char* AUTOTerm::state_to_string_(uint8_t state) {
 
 const char* AUTOTerm::mode_to_string_(uint8_t mode) {
   switch(mode) {
-    case 0x01: return "Heater sensor";
-    case 0x02: return "Panel sensor";
-    case 0x03: return "External sensor";
-    case 0x04: return "Power";
+    case 0x01: return "By Heater";
+    case 0x02: return "By Panel";
+    case 0x03: return "By External";
+    case 0x04: return "By Power";
     default: return "Unknown";
   }
 }
