@@ -7,6 +7,11 @@ namespace autoterm {
 const char *const VentilationSwitch::TAG = "autoterm.ventilation";
 
 void VentilationSwitch::write_state(bool state) {
+  // Ask parent to apply it to hardware; parent can return the applied value
+  if (auto *p = this->get_parent()) {
+    p->apply_ventilation(state);
+  }
+
   this->publish_state(state);
 }
 

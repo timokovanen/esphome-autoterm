@@ -27,12 +27,18 @@ class AUTOTerm : public Component {
   static const uint8_t PREAMBLE = 0xaa;
   static const uint8_t SENDER_PANEL = 0x03;
   static const uint8_t SENDER_HEATER = 0x04;
+  static const uint8_t MODE_BY_HEATER = 0x01;
+  static const uint8_t MODE_BY_PANEL = 0x02;
+  static const uint8_t MODE_BY_EXTERNAL = 0x03;
+  static const uint8_t MODE_BY_POWER = 0x04;
   static const uint8_t STATE_OFF = 0x00;
   static const uint8_t STATE_STARTING = 0x01;
   static const uint8_t STATE_RUNNING = 0x04;
   static const uint8_t STATE_SHUTTING_DOWN = 0x05;
   static const uint8_t STATE_TESTING = 0x06;
   static const uint8_t STATE_VENTILATION = 0x08;
+  static const uint8_t VENTILATION_ON = 0x01;
+  static const uint8_t VENTILATION_OFF = 0x02;
   static const uint8_t CMD_START = 0x01;
   static const uint8_t CMD_SET = 0x02;
   static const uint8_t CMD_SHUTDOWN = 0x03;
@@ -55,13 +61,17 @@ class AUTOTerm : public Component {
   void set_battery_voltage_sensor(sensor::Sensor *sensor) { this->battery_voltage_sensor_ = sensor; }
   void set_operating_state_sensor(text_sensor::TextSensor *sensor) { operating_state_sensor_ = sensor; }
   void set_operating_mode_select(select::Select *s) { this->operating_mode_select_ = s; }
+
+  // --- switch setters --
   void set_ventilation_switch(switch_::Switch *sw) { this->ventilation_switch_ = sw; }
   void set_power_switch(switch_::Switch *sw) { this->power_switch_ = sw; }
-  void set_temperature_setpoint_number(number::Number *num) { this->temperature_setpoint_number_ = num; }
-  void apply_temperature_setpoint(uint8_t setpoint);  // called by the number child
-  void set_power_level_number(number::Number *num) { this->power_level_number_ = num; }
-  void apply_power_level(uint8_t level);  // called by the number child
+  void apply_ventilation(bool state);  // called by the switch child
 
+  // --- number setters --
+  void set_temperature_setpoint_number(number::Number *num) { this->temperature_setpoint_number_ = num; }
+  void set_power_level_number(number::Number *num) { this->power_level_number_ = num; }
+  void apply_temperature_setpoint(uint8_t setpoint);  // called by the number child
+  void apply_power_level(uint8_t level);  // called by the number child
 
   void setup() override;
   void loop() override;
@@ -123,13 +133,13 @@ class AUTOTerm : public Component {
   void publish_mqtt_();
   void on_json_message_(JsonObject &root);
 #endif
+  void command_to_heater_(uint8_t cmd, uint8_t mode, uint8_t temp_set, uint8_t power, uint8_t vent);
   void parse_message_(const std::vector<uint8_t> &buf);
   uint16_t crc16_modbus_(const uint8_t* data, size_t len);
   bool verify_crc16_modbus_(const std::vector<uint8_t> &buf);
   void update_sensors_();
   const char* state_to_string_(uint8_t state);
   const char* mode_to_string_(uint8_t mode);
-  // bool vent_to_binary_(uint8_t vent);
   static const char *const TAG;
 };
 
