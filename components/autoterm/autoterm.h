@@ -16,12 +16,6 @@
 #include "esphome/components/text_sensor/text_sensor.h"
 #endif
 
-#ifdef USE_BINARY_SENSOR
-#include "esphome/components/binary_sensor/binary_sensor.h"
-#endif
-
-#include "esphome/components/number/number.h"
-
 #include "ventilation_switch.h"
 #include "power_level_number.h"
 
@@ -66,7 +60,6 @@ class AUTOTerm : public Component {
   void set_temperature_setpoint_sensor(sensor::Sensor *sensor) { temperature_setpoint_sensor_ = sensor; }
   void set_operating_state_sensor(text_sensor::TextSensor *sensor) { operating_state_sensor_ = sensor; }
   void set_operating_mode_sensor(text_sensor::TextSensor *sensor) { operating_mode_sensor_ = sensor; }
-  void set_ventilation_sensor(binary_sensor::BinarySensor *sensor) { ventilation_sensor_ = sensor; }
   void set_ventilation_switch(switch_::Switch *sw) { this->ventilation_switch_ = sw; }
 
   void set_power_level_number(number::Number *num) { this->power_level_number_ = num; }
@@ -120,9 +113,7 @@ class AUTOTerm : public Component {
   sensor::Sensor *temperature_setpoint_sensor_{nullptr};
   text_sensor::TextSensor *operating_state_sensor_{nullptr};
   text_sensor::TextSensor *operating_mode_sensor_{nullptr};
-  binary_sensor::BinarySensor *ventilation_sensor_{nullptr};
   switch_::Switch *ventilation_switch_{nullptr};
-
   number::Number *power_level_number_{nullptr};
 
   // --- helpers ---

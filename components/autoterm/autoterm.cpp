@@ -286,7 +286,6 @@ const char* AUTOTerm::mode_to_string_(uint8_t mode) {
 }
 #endif
 
-#ifdef USE_BINARY_SENSOR
 bool AUTOTerm::vent_to_binary_(uint8_t vent) {
   switch(vent) {
     case 0x01: return true;
@@ -294,7 +293,6 @@ bool AUTOTerm::vent_to_binary_(uint8_t vent) {
     default: return false;
   }
 }
-#endif
 
 // NEW: hardware apply hook
 void AUTOTerm::apply_power_level(uint8_t level) {
@@ -330,11 +328,8 @@ void AUTOTerm::update_sensors_() {
   if (operating_mode_sensor_) {
     operating_mode_sensor_->publish_state(mode_to_string_(autoterm_operating_mode_));
   }
-  if (ventilation_sensor_) {
-    ventilation_sensor_->publish_state(vent_to_binary_(autoterm_ventilation_));
-  }
   if (ventilation_switch_) {
-    this->ventilation_switch_->publish_state(vent_to_binary_(this->autoterm_ventilation_));
+    this->ventilation_switch_->publish_state(this->autoterm_ventilation_ == 0x01);
   }
   if (power_level_number_) {
     this->power_level_number_->publish_state(static_cast<float>(this->autoterm_power_level_));

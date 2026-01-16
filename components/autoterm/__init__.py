@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import uart, sensor, text_sensor, binary_sensor, switch, number
+from esphome.components import uart, sensor, text_sensor, switch, number
 from esphome.const import CONF_ID
 from esphome.core import CORE
 
@@ -41,8 +41,6 @@ CONF_OPERATING_STATE = "operating_state"
 CONF_OPERATING_MODE = "operating_mode"
 CONF_VENTILATION = "ventilation"
 
-CONF_VENTILATION_SWITCH = "ventilation_switch"
-
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(AUTOTerm),
     cv.Required(CONF_UART_PANEL): cv.use_id(uart.UARTComponent),
@@ -77,13 +75,10 @@ CONFIG_SCHEMA = cv.Schema({
         accuracy_decimals=0,
         device_class="temperature"
     ),
-    cv.Optional(CONF_POWER_LEVEL): number.number_schema(
-        PowerLevelNumber
-    ).extend({}),
+    cv.Optional(CONF_POWER_LEVEL): number.number_schema(PowerLevelNumber),
     cv.Optional(CONF_OPERATING_STATE): text_sensor.text_sensor_schema(),
     cv.Optional(CONF_OPERATING_MODE): text_sensor.text_sensor_schema(),
-    cv.Optional(CONF_VENTILATION): binary_sensor.binary_sensor_schema(),
-    cv.Optional(CONF_VENTILATION_SWITCH): switch.switch_schema(VentilationSwitch),
+    cv.Optional(CONF_VENTILATION): switch.switch_schema(VentilationSwitch),
 }).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
@@ -124,10 +119,7 @@ async def to_code(config):
         sens = await text_sensor.new_text_sensor(config[CONF_OPERATING_MODE])
         cg.add(var.set_operating_mode_sensor(sens))
     if CONF_VENTILATION in config:
-        sens = await binary_sensor.new_binary_sensor(config[CONF_VENTILATION])
-        cg.add(var.set_ventilation_sensor(sens))
-    if CONF_VENTILATION_SWITCH in config:
-        sw = await switch.new_switch(config[CONF_VENTILATION_SWITCH])
+        sw = await switch.new_switch(config[CONF_VENTILATION])
         cg.add(sw.set_parent(var))
         cg.add(var.set_ventilation_switch(sw))
     if CONF_POWER_LEVEL in config:
