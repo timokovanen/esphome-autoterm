@@ -37,7 +37,7 @@ ota:
 
 external_components:
   - source: components
-
+  
 uart:
   - id: panel
     tx_pin: GPIO17
@@ -77,6 +77,8 @@ autoterm:
     name: "Operating Mode"
   ventilation:
     name: "Ventilation"
+  ventilation_switch:
+    name: "Ventilation switch"
 
 sensor:
 

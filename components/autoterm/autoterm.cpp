@@ -12,6 +12,12 @@ void AUTOTerm::setup() {
   buf_panel_to_heater_.reserve(buffer_size_);
   buf_heater_to_panel_.reserve(buffer_size_);
   buf_autoterm_to_heater_.reserve(13);
+
+  // // Initialize to a sane default, publish once if we have the entity
+  // if (this->power_level_ != nullptr) {
+  //   this->power_level_cache_ = 0;
+  //   this->power_level_->publish_state(static_cast<float>(this->power_level_cache_));
+  // }
 }
 
 void AUTOTerm::read_from_(uart::UARTComponent *src, std::vector<uint8_t> &buf, uint32_t &last_rx) {
@@ -278,14 +284,6 @@ const char* AUTOTerm::mode_to_string_(uint8_t mode) {
     default: return "Unknown";
   }
 }
-
-// const char* AUTOTerm::vent_to_string_(uint8_t vent) {
-//   switch(vent) {
-//     case 0x01: return "on";
-//     case 0x02: return "off";
-//     default: return "Unknown";
-//   }
-// }
 #endif
 
 #ifdef USE_BINARY_SENSOR
@@ -298,7 +296,18 @@ bool AUTOTerm::vent_to_binary_(uint8_t vent) {
 }
 #endif
 
-#ifdef USE_SENSOR
+// NEW: hardware apply hook
+void AUTOTerm::apply_power_level(uint8_t level) {
+  if (level < 0) level = 0;
+  if (level > 9) level = 9;
+
+  // TODO: write to hardware (e.g., set PWM, send UART/I2C cmd, etc.)
+  // For now we just cache it.
+  // this->power_level_cache_ = level;
+
+  ESP_LOGI(TAG, "Applied power_level = %d", level);
+}
+
 void AUTOTerm::update_sensors_() {
   if (heater_temperature_sensor_) {
     heater_temperature_sensor_->publish_state(autoterm_heater_temperature_);
@@ -315,25 +324,22 @@ void AUTOTerm::update_sensors_() {
   if (temperature_setpoint_sensor_) {
     temperature_setpoint_sensor_->publish_state(autoterm_temperature_setpoint_);
   }
-  if (power_level_sensor_) {
-    power_level_sensor_->publish_state(autoterm_power_level_);
-  }
-#ifdef USE_TEXT_SENSOR
   if (operating_state_sensor_) {
     operating_state_sensor_->publish_state(state_to_string_(autoterm_operating_state_));
   }
   if (operating_mode_sensor_) {
     operating_mode_sensor_->publish_state(mode_to_string_(autoterm_operating_mode_));
   }
-#endif
-#ifdef USE_BINARY_SENSOR
   if (ventilation_sensor_) {
-    // ventilation_sensor_->publish_state(vent_to_string_(autoterm_ventilation_));
     ventilation_sensor_->publish_state(vent_to_binary_(autoterm_ventilation_));
   }
-#endif
+  if (ventilation_switch_) {
+    this->ventilation_switch_->publish_state(vent_to_binary_(this->autoterm_ventilation_));
+  }
+  if (power_level_number_) {
+    this->power_level_number_->publish_state(static_cast<float>(this->autoterm_power_level_));
+  }
 }
-#endif
 
 void AUTOTerm::loop() {
   uint32_t now = millis();

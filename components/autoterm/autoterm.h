@@ -20,10 +20,10 @@
 #include "esphome/components/binary_sensor/binary_sensor.h"
 #endif
 
-#ifdef USE_SWITCH
-#include "esphome/components/switch/switch.h"
-#endif
+#include "esphome/components/number/number.h"
 
+#include "ventilation_switch.h"
+#include "power_level_number.h"
 
 #include <vector>
 #include <string>
@@ -64,11 +64,13 @@ class AUTOTerm : public Component {
   void set_external_temperature_sensor(sensor::Sensor *sensor) { external_temperature_sensor_ = sensor; }
   void set_battery_voltage_sensor(sensor::Sensor *sensor) { battery_voltage_sensor_ = sensor; }
   void set_temperature_setpoint_sensor(sensor::Sensor *sensor) { temperature_setpoint_sensor_ = sensor; }
-  void set_power_level_sensor(sensor::Sensor *sensor) { power_level_sensor_ = sensor; }
   void set_operating_state_sensor(text_sensor::TextSensor *sensor) { operating_state_sensor_ = sensor; }
   void set_operating_mode_sensor(text_sensor::TextSensor *sensor) { operating_mode_sensor_ = sensor; }
-  // void set_ventilation_sensor(text_sensor::TextSensor *sensor) { ventilation_sensor_ = sensor; }
   void set_ventilation_sensor(binary_sensor::BinarySensor *sensor) { ventilation_sensor_ = sensor; }
+  void set_ventilation_switch(switch_::Switch *sw) { this->ventilation_switch_ = sw; }
+
+  void set_power_level_number(number::Number *num) { this->power_level_number_ = num; }
+  void apply_power_level(uint8_t level);  // called by the number child
 
 
   void setup() override;
@@ -111,24 +113,17 @@ class AUTOTerm : public Component {
   int8_t autoterm_external_temperature_{0}; // external temp sensor
 
   // --- sensors ---
-#ifdef USE_SENSOR
   sensor::Sensor *heater_temperature_sensor_{nullptr};
   sensor::Sensor *panel_temperature_sensor_{nullptr};
   sensor::Sensor *external_temperature_sensor_{nullptr};
   sensor::Sensor *battery_voltage_sensor_{nullptr};
   sensor::Sensor *temperature_setpoint_sensor_{nullptr};
-  sensor::Sensor *power_level_sensor_{nullptr};
-#endif
-#ifdef USE_TEXT_SENSOR
   text_sensor::TextSensor *operating_state_sensor_{nullptr};
   text_sensor::TextSensor *operating_mode_sensor_{nullptr};
-  // text_sensor::TextSensor *ventilation_sensor_{nullptr};
-#endif
-#ifdef USE_BINARY_SENSOR
   binary_sensor::BinarySensor *ventilation_sensor_{nullptr};
-#endif
-  // --- switches ---
+  switch_::Switch *ventilation_switch_{nullptr};
 
+  number::Number *power_level_number_{nullptr};
 
   // --- helpers ---
   void read_from_(uart::UARTComponent *src, std::vector<uint8_t> &buf, uint32_t &last_rx);
@@ -142,17 +137,10 @@ class AUTOTerm : public Component {
   void parse_message_(const std::vector<uint8_t> &buf);
   uint16_t crc16_modbus_(const uint8_t* data, size_t len);
   bool verify_crc16_modbus_(const std::vector<uint8_t> &buf);
-#ifdef USE_SENSOR
   void update_sensors_();
-#endif
-#ifdef USE_TEXT_SENSOR
   const char* state_to_string_(uint8_t state);
   const char* mode_to_string_(uint8_t mode);
-  // const char* vent_to_string_(uint8_t vent);
-#endif
-#ifdef USE_BINARY_SENSOR
   bool vent_to_binary_(uint8_t vent);
-#endif
   static const char *const TAG;
 };
 
