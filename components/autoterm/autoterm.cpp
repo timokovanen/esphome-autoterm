@@ -300,23 +300,33 @@ void AUTOTerm::apply_ventilation(bool state) {
   ESP_LOGI(TAG, "Applied ventilation = %d", vent);
 }
 
-void AUTOTerm::apply_power_level(uint8_t level) {
-  if (level < 0) level = 0;
-  if (level > 9) level = 9;
-  this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, this->autoterm_temperature_setpoint_, level, this->autoterm_ventilation_);
-  ESP_LOGI(TAG, "Applied power_level = %d", level);
+void AUTOTerm::apply_power_level(uint8_t power) {
+  if (power < 0) power = 0;
+  if (power > 9) power = 9;
+  this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, this->autoterm_temperature_setpoint_, power, this->autoterm_ventilation_);
+  ESP_LOGI(TAG, "Applied power_level = %d", power);
 }
 
-// NEW: hardware apply hook
-void AUTOTerm::apply_temperature_setpoint(uint8_t level) {
-  if (level < 1) level = 1;
-  if (level > 30) level = 30;
+void AUTOTerm::apply_temperature_setpoint(uint8_t temp_set) {
+  if (temp_set < 1) temp_set = 1;
+  if (temp_set > 30) temp_set = 30;
+  this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, temp_set, this->autoterm_power_level_, this->autoterm_ventilation_);
+  ESP_LOGI(TAG, "Applied temperature_setpoint = %d", temp_set);
+}
 
-  // TODO: write to hardware (e.g., set PWM, send UART/I2C cmd, etc.)
-  // For now we just cache it.
-  // this->power_level_cache_ = level;
-
-  ESP_LOGI(TAG, "Applied temperature_setpoint = %d", level);
+void AUTOTerm::apply_operating_mode(const std::string &value) {
+  uint8_t mode;
+  if (value == "By Heater" || value == "By Panel" || value == "By External" || value == "By Power") {
+    if (value == "By Heater") mode = MODE_BY_HEATER;
+    else if (value == "By Panel") mode = MODE_BY_PANEL;
+    else if (value == "By External") mode = MODE_BY_EXTERNAL;
+    else if (value == "By Power") mode = MODE_BY_POWER;
+    this->command_to_heater_(CMD_SET, mode, this->autoterm_temperature_setpoint_, this->autoterm_power_level_, this->autoterm_ventilation_);
+  ESP_LOGI(TAG, "Applied operating_mode = %d", mode);
+  } else {
+    ESP_LOGW(TAG, "Unsupported operating mode value: %s", value.c_str());
+    return;
+  }
 }
 
 void AUTOTerm::update_sensors_() {

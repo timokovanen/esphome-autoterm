@@ -60,18 +60,21 @@ class AUTOTerm : public Component {
   void set_external_temperature_sensor(sensor::Sensor *sensor) { external_temperature_sensor_ = sensor; }
   void set_battery_voltage_sensor(sensor::Sensor *sensor) { this->battery_voltage_sensor_ = sensor; }
   void set_operating_state_sensor(text_sensor::TextSensor *sensor) { operating_state_sensor_ = sensor; }
+
+  // --- select setters --
   void set_operating_mode_select(select::Select *s) { this->operating_mode_select_ = s; }
+  void apply_operating_mode(const std::string &value);
 
   // --- switch setters --
   void set_ventilation_switch(switch_::Switch *sw) { this->ventilation_switch_ = sw; }
   void set_power_switch(switch_::Switch *sw) { this->power_switch_ = sw; }
-  void apply_ventilation(bool state);  // called by the switch child
+  void apply_ventilation(bool state);
 
   // --- number setters --
   void set_temperature_setpoint_number(number::Number *num) { this->temperature_setpoint_number_ = num; }
   void set_power_level_number(number::Number *num) { this->power_level_number_ = num; }
-  void apply_temperature_setpoint(uint8_t setpoint);  // called by the number child
-  void apply_power_level(uint8_t level);  // called by the number child
+  void apply_temperature_setpoint(uint8_t temp_set);
+  void apply_power_level(uint8_t power);
 
   void setup() override;
   void loop() override;
