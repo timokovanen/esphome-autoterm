@@ -1,10 +1,10 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import uart, sensor, text_sensor, switch, number
-from esphome.const import CONF_ID
+from esphome.const import CONF_ID, UNIT_CELSIUS, UNIT_VOLT, DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_VOLTAGE
 from esphome.core import CORE
 
-AUTO_LOAD = ["switch", "number"]
+AUTO_LOAD = ["sensor","switch", "number"]
 
 autoterm_ns = cg.esphome_ns.namespace('autoterm')
 switches_ns = autoterm_ns.namespace('switches')
@@ -20,6 +20,11 @@ VentilationSwitch = switches_ns.class_(
 
 PowerLevelNumber = numbers_ns.class_(
     'PowerLevelNumber',
+    number.Number,
+    cg.Parented.template(AUTOTerm)
+)
+TemperatureSetpointNumber = numbers_ns.class_(
+    'TemperatureSetpointNumber',
     number.Number,
     cg.Parented.template(AUTOTerm)
 )
@@ -51,30 +56,26 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_SUBSCRIBE_TOPIC): cv.string,
     cv.Optional(CONF_REFRESH_MS, default=30000): cv.int_range(min=5000, max=60000),
     cv.Optional(CONF_HEATER_TEMPERATURE): sensor.sensor_schema(
-        unit_of_measurement="°C",
+        unit_of_measurement=UNIT_CELSIUS,
         accuracy_decimals=0,
-        device_class="temperature"
+        device_class=DEVICE_CLASS_TEMPERATURE
     ),
     cv.Optional(CONF_PANEL_TEMPERATURE): sensor.sensor_schema(
-        unit_of_measurement="°C",
+        unit_of_measurement=UNIT_CELSIUS,
         accuracy_decimals=0,
-        device_class="temperature"
+        device_class=DEVICE_CLASS_TEMPERATURE
     ),
     cv.Optional(CONF_EXTERNAL_TEMPERATURE): sensor.sensor_schema(
-        unit_of_measurement="°C",
+        unit_of_measurement=UNIT_CELSIUS,
         accuracy_decimals=0,
-        device_class="temperature"
+        device_class=DEVICE_CLASS_TEMPERATURE
     ),
     cv.Optional(CONF_BATTERY_VOLTAGE): sensor.sensor_schema(
-        unit_of_measurement="V",
+        unit_of_measurement=UNIT_VOLT,
         accuracy_decimals=1,
-        device_class="voltage"
+        device_class=DEVICE_CLASS_VOLTAGE
     ),
-    cv.Optional(CONF_TEMPERATURE_SETPOINT): sensor.sensor_schema(
-        unit_of_measurement="°C",
-        accuracy_decimals=0,
-        device_class="temperature"
-    ),
+    cv.Optional(CONF_TEMPERATURE_SETPOINT): number.number_schema(TemperatureSetpointNumber),
     cv.Optional(CONF_POWER_LEVEL): number.number_schema(PowerLevelNumber),
     cv.Optional(CONF_OPERATING_STATE): text_sensor.text_sensor_schema(),
     cv.Optional(CONF_OPERATING_MODE): text_sensor.text_sensor_schema(),
@@ -83,7 +84,7 @@ CONFIG_SCHEMA = cv.Schema({
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    await cg.register_component(var, config)
+
     uart_panel = await cg.get_variable(config[CONF_UART_PANEL])
     uart_heater = await cg.get_variable(config[CONF_UART_HEATER])
     cg.add(var.set_uart_panel(uart_panel))
@@ -109,9 +110,6 @@ async def to_code(config):
     if CONF_BATTERY_VOLTAGE in config:
         sens = await sensor.new_sensor(config[CONF_BATTERY_VOLTAGE])
         cg.add(var.set_battery_voltage_sensor(sens))
-    if CONF_TEMPERATURE_SETPOINT in config:
-        sens = await sensor.new_sensor(config[CONF_TEMPERATURE_SETPOINT])
-        cg.add(var.set_temperature_setpoint_sensor(sens))
     if CONF_OPERATING_STATE in config:
         sens = await text_sensor.new_text_sensor(config[CONF_OPERATING_STATE])
         cg.add(var.set_operating_state_sensor(sens))
@@ -138,3 +136,14 @@ async def to_code(config):
         # Optional: set mode if you prefer slider vs box (defaults are fine)
         # from esphome.components.number import NumberMode
         # cg.add(num.set_mode(number.NumberMode.BOX))
+    if CONF_TEMPERATURE_SETPOINT in config:
+        num = await number.new_number(
+            config[CONF_TEMPERATURE_SETPOINT],
+            min_value=1.0,
+            max_value=30.0,           
+            step=1.0,
+        )
+        cg.add(num.set_parent(var))
+        cg.add(var.set_temperature_setpoint_number(num))
+
+    await cg.register_component(var, config)

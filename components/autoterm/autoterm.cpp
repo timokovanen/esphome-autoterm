@@ -306,6 +306,18 @@ void AUTOTerm::apply_power_level(uint8_t level) {
   ESP_LOGI(TAG, "Applied power_level = %d", level);
 }
 
+// NEW: hardware apply hook
+void AUTOTerm::apply_temperature_setpoint(uint8_t level) {
+  if (level < 1) level = 1;
+  if (level > 30) level = 30;
+
+  // TODO: write to hardware (e.g., set PWM, send UART/I2C cmd, etc.)
+  // For now we just cache it.
+  // this->power_level_cache_ = level;
+
+  ESP_LOGI(TAG, "Applied power_level = %d", level);
+}
+
 void AUTOTerm::update_sensors_() {
   if (heater_temperature_sensor_) {
     heater_temperature_sensor_->publish_state(autoterm_heater_temperature_);
@@ -319,9 +331,6 @@ void AUTOTerm::update_sensors_() {
   if (battery_voltage_sensor_) {
     battery_voltage_sensor_->publish_state((float)autoterm_battery_voltage_ / 10.0f);
   }
-  if (temperature_setpoint_sensor_) {
-    temperature_setpoint_sensor_->publish_state(autoterm_temperature_setpoint_);
-  }
   if (operating_state_sensor_) {
     operating_state_sensor_->publish_state(state_to_string_(autoterm_operating_state_));
   }
@@ -330,6 +339,9 @@ void AUTOTerm::update_sensors_() {
   }
   if (ventilation_switch_) {
     this->ventilation_switch_->publish_state(this->autoterm_ventilation_ == 0x01);
+  }
+  if (temperature_setpoint_number_) {
+    this->temperature_setpoint_number_->publish_state(static_cast<float>(this->autoterm_temperature_setpoint_));
   }
   if (power_level_number_) {
     this->power_level_number_->publish_state(static_cast<float>(this->autoterm_power_level_));
