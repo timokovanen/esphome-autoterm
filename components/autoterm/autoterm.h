@@ -13,8 +13,9 @@
 #endif
 
 #include "esphome/components/sensor/sensor.h"
-#include "switches.h"
-#include "numbers.h"
+#include "autoterm_switch.h"
+#include "autoterm_number.h"
+#include "autoterm_select.h"
 
 #include <vector>
 #include <string>
@@ -55,7 +56,7 @@ class AUTOTerm : public Component {
   void set_external_temperature_sensor(sensor::Sensor *sensor) { external_temperature_sensor_ = sensor; }
   void set_battery_voltage_sensor(sensor::Sensor *sensor) { this->battery_voltage_sensor_ = sensor; }
   void set_operating_state_sensor(text_sensor::TextSensor *sensor) { operating_state_sensor_ = sensor; }
-  void set_operating_mode_sensor(text_sensor::TextSensor *sensor) { operating_mode_sensor_ = sensor; }
+  void set_operating_mode_select(select::Select *s) { this->operating_mode_select_ = s; }
   void set_ventilation_switch(switch_::Switch *sw) { this->ventilation_switch_ = sw; }
 
   void set_temperature_setpoint_number(number::Number *num) { this->temperature_setpoint_number_ = num; }
@@ -109,7 +110,7 @@ class AUTOTerm : public Component {
   sensor::Sensor *external_temperature_sensor_{nullptr};
   sensor::Sensor *battery_voltage_sensor_{nullptr};
   text_sensor::TextSensor *operating_state_sensor_{nullptr};
-  text_sensor::TextSensor *operating_mode_sensor_{nullptr};
+  select::Select *operating_mode_select_{nullptr};
   switch_::Switch *ventilation_switch_{nullptr};
   number::Number *temperature_setpoint_number_{nullptr};
   number::Number *power_level_number_{nullptr};

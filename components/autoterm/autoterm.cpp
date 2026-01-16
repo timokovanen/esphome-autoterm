@@ -329,13 +329,13 @@ void AUTOTerm::update_sensors_() {
     external_temperature_sensor_->publish_state(autoterm_external_temperature_);
   }
   if (battery_voltage_sensor_) {
-    battery_voltage_sensor_->publish_state((float)autoterm_battery_voltage_ / 10.0f);
+    this->battery_voltage_sensor_->publish_state(static_cast<float>(this->autoterm_battery_voltage_) / 10.0f);
   }
   if (operating_state_sensor_) {
     operating_state_sensor_->publish_state(state_to_string_(autoterm_operating_state_));
   }
-  if (operating_mode_sensor_) {
-    operating_mode_sensor_->publish_state(mode_to_string_(autoterm_operating_mode_));
+  if (operating_mode_select_) {
+    this->operating_mode_select_->publish_state(mode_to_string_(autoterm_operating_mode_));
   }
   if (ventilation_switch_) {
     this->ventilation_switch_->publish_state(this->autoterm_ventilation_ == 0x01);

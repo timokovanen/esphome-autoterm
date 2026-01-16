@@ -4,11 +4,11 @@
 #include "esphome/components/switch/switch.h"
 #include "esphome/core/helpers.h"
 
+#include "autoterm.h" // for Parented<AUTOTerm>
+
 namespace esphome {
 namespace autoterm {
 class AUTOTerm;
-
-namespace switches {
 
 class VentilationSwitch : public switch_::Switch, public Parented<AUTOTerm> {
  public:
@@ -19,6 +19,5 @@ class VentilationSwitch : public switch_::Switch, public Parented<AUTOTerm> {
   static const char *const TAG;
 };
 
-} // namespace switches
 } // namespace autoterm
 } // namespace esphome

@@ -4,13 +4,11 @@
 #include "esphome/components/number/number.h"
 #include "esphome/core/helpers.h"
 
-#include "autoterm.h"  // to access parent's API
+#include "autoterm.h" // for Parented<AUTOTerm>
 
 namespace esphome {
 namespace autoterm {
 class AUTOTerm;
-
-namespace numbers {
 
 class PowerLevelNumber : public number::Number, public Parented<AUTOTerm> {
  public:
@@ -36,6 +34,5 @@ class TemperatureSetpointNumber : public number::Number, public Parented<AUTOTer
   static const char *const TAG;
 };
 
-}  // namespace numbers
 }  // namespace autoterm
 }  // namespace esphome

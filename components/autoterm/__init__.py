@@ -1,31 +1,36 @@
+import gc
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import uart, sensor, text_sensor, switch, number
+from esphome.components import uart, sensor, text_sensor, switch, number, select
 from esphome.const import CONF_ID, UNIT_CELSIUS, UNIT_VOLT, DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_VOLTAGE
 from esphome.core import CORE
 
-AUTO_LOAD = ["sensor","switch", "number"]
+AUTO_LOAD = ["sensor","switch", "number", "select"]
 
 autoterm_ns = cg.esphome_ns.namespace('autoterm')
-switches_ns = autoterm_ns.namespace('switches')
-numbers_ns = autoterm_ns.namespace('numbers')
 
 AUTOTerm = autoterm_ns.class_('AUTOTerm', cg.Component)
 
-VentilationSwitch = switches_ns.class_(
+VentilationSwitch = autoterm_ns.class_(
     'VentilationSwitch',
     switch.Switch,
     cg.Parented.template(AUTOTerm)
 )
 
-PowerLevelNumber = numbers_ns.class_(
+PowerLevelNumber = autoterm_ns.class_(
     'PowerLevelNumber',
     number.Number,
     cg.Parented.template(AUTOTerm)
 )
-TemperatureSetpointNumber = numbers_ns.class_(
+TemperatureSetpointNumber = autoterm_ns.class_(
     'TemperatureSetpointNumber',
     number.Number,
+    cg.Parented.template(AUTOTerm)
+)
+
+ModeSelect = autoterm_ns.class_(
+    "ModeSelect",
+    select.Select,
     cg.Parented.template(AUTOTerm)
 )
 
@@ -78,22 +83,26 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_TEMPERATURE_SETPOINT): number.number_schema(TemperatureSetpointNumber),
     cv.Optional(CONF_POWER_LEVEL): number.number_schema(PowerLevelNumber),
     cv.Optional(CONF_OPERATING_STATE): text_sensor.text_sensor_schema(),
-    cv.Optional(CONF_OPERATING_MODE): text_sensor.text_sensor_schema(),
+    # cv.Optional(CONF_OPERATING_MODE): text_sensor.text_sensor_schema(),
+    cv.Optional(CONF_OPERATING_MODE): select.select_schema(ModeSelect),
+
+
+
     cv.Optional(CONF_VENTILATION): switch.switch_schema(VentilationSwitch),
 }).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-
+    await cg.register_component(var, config)
     uart_panel = await cg.get_variable(config[CONF_UART_PANEL])
     uart_heater = await cg.get_variable(config[CONF_UART_HEATER])
     cg.add(var.set_uart_panel(uart_panel))
     cg.add(var.set_uart_heater(uart_heater))
     cg.add(var.set_timeout_ms(config[CONF_TIMEOUT_MS]))
     cg.add(var.set_buffer_size(config[CONF_BUFFER_SIZE]))
-    publish_topic = config.get(CONF_PUBLISH_TOPIC, f"{CORE.name}/autoterm")
+    publish_topic = config.get(CONF_PUBLISH_TOPIC, f"{CORE.name}/autoterm/state")
     cg.add(var.set_publish_topic(cg.std_string(publish_topic)))
-    subscribe_topic = config.get(CONF_SUBSCRIBE_TOPIC, f"{CORE.name}/autoterm/cmd")
+    subscribe_topic = config.get(CONF_SUBSCRIBE_TOPIC, f"{CORE.name}/autoterm/command")
     cg.add(var.set_subscribe_topic(cg.std_string(subscribe_topic)))
     cg.add(var.set_refresh_ms(config[CONF_REFRESH_MS]))
 
@@ -114,8 +123,12 @@ async def to_code(config):
         sens = await text_sensor.new_text_sensor(config[CONF_OPERATING_STATE])
         cg.add(var.set_operating_state_sensor(sens))
     if CONF_OPERATING_MODE in config:
-        sens = await text_sensor.new_text_sensor(config[CONF_OPERATING_MODE])
-        cg.add(var.set_operating_mode_sensor(sens))
+        s = await select.new_select(
+            config[CONF_OPERATING_MODE],
+            options=["By Heater", "By Panel", "By External", "By Power"]
+        )
+        cg.add(s.set_parent(var))
+        cg.add(var.set_operating_mode_select(s))
     if CONF_VENTILATION in config:
         sw = await switch.new_switch(config[CONF_VENTILATION])
         cg.add(sw.set_parent(var))
@@ -129,13 +142,6 @@ async def to_code(config):
         )
         cg.add(num.set_parent(var))
         cg.add(var.set_power_level_number(num))
-        # Lock traits: 0..9 step 1 (integers)
-        # cg.add(num.set_min_value(0.0))
-        # cg.add(num.set_max_value(9.0))
-        # cg.add(num.set_step(1.0))
-        # Optional: set mode if you prefer slider vs box (defaults are fine)
-        # from esphome.components.number import NumberMode
-        # cg.add(num.set_mode(number.NumberMode.BOX))
     if CONF_TEMPERATURE_SETPOINT in config:
         num = await number.new_number(
             config[CONF_TEMPERATURE_SETPOINT],
@@ -146,4 +152,4 @@ async def to_code(config):
         cg.add(num.set_parent(var))
         cg.add(var.set_temperature_setpoint_number(num))
 
-    await cg.register_component(var, config)
+    

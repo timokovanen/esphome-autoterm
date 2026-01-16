@@ -1,9 +1,8 @@
-#include "numbers.h"
+#include "autoterm_number.h"
 #include "esphome/core/log.h"
 
 namespace esphome {
 namespace autoterm {
-namespace numbers {
 
 const char *const PowerLevelNumber::TAG = "autoterm.power_level";
 const char *const TemperatureSetpointNumber::TAG = "autoterm.temperature_setpoint";
@@ -42,6 +41,5 @@ void TemperatureSetpointNumber::control(float value) {
   this->publish_state(value);
 }
 
-}  // namespace numbers
 }  // namespace autoterm
 }  // namespace esphome
