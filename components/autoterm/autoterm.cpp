@@ -286,13 +286,13 @@ const char* AUTOTerm::mode_to_string_(uint8_t mode) {
 }
 #endif
 
-bool AUTOTerm::vent_to_binary_(uint8_t vent) {
-  switch(vent) {
-    case 0x01: return true;
-    // case 0x02: return false;
-    default: return false;
-  }
-}
+// bool AUTOTerm::vent_to_binary_(uint8_t vent) {
+//   switch(vent) {
+//     case 0x01: return true;
+//     // case 0x02: return false;
+//     default: return false;
+//   }
+// }
 
 // NEW: hardware apply hook
 void AUTOTerm::apply_power_level(uint8_t level) {

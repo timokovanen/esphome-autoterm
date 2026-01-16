@@ -5,7 +5,7 @@ from esphome.components import uart, sensor, text_sensor, switch, number, select
 from esphome.const import CONF_ID, UNIT_CELSIUS, UNIT_VOLT, DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_VOLTAGE
 from esphome.core import CORE
 
-AUTO_LOAD = ["sensor","switch", "number", "select"]
+AUTO_LOAD = ["sensor", "text_sensor", "switch", "number", "select"]
 
 autoterm_ns = cg.esphome_ns.namespace('autoterm')
 
@@ -13,6 +13,12 @@ AUTOTerm = autoterm_ns.class_('AUTOTerm', cg.Component)
 
 VentilationSwitch = autoterm_ns.class_(
     'VentilationSwitch',
+    switch.Switch,
+    cg.Parented.template(AUTOTerm)
+)
+
+PowerSwitch = autoterm_ns.class_(
+    'PowerSwitch',
     switch.Switch,
     cg.Parented.template(AUTOTerm)
 )
@@ -50,6 +56,7 @@ CONF_POWER_LEVEL = "power_level"
 CONF_OPERATING_STATE = "operating_state"
 CONF_OPERATING_MODE = "operating_mode"
 CONF_VENTILATION = "ventilation"
+CONF_POWER_SWITCH = "power_switch"
 
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(AUTOTerm),
@@ -83,12 +90,9 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_TEMPERATURE_SETPOINT): number.number_schema(TemperatureSetpointNumber),
     cv.Optional(CONF_POWER_LEVEL): number.number_schema(PowerLevelNumber),
     cv.Optional(CONF_OPERATING_STATE): text_sensor.text_sensor_schema(),
-    # cv.Optional(CONF_OPERATING_MODE): text_sensor.text_sensor_schema(),
     cv.Optional(CONF_OPERATING_MODE): select.select_schema(ModeSelect),
-
-
-
     cv.Optional(CONF_VENTILATION): switch.switch_schema(VentilationSwitch),
+    cv.Optional(CONF_POWER_SWITCH): switch.switch_schema(PowerSwitch),
 }).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
@@ -133,6 +137,10 @@ async def to_code(config):
         sw = await switch.new_switch(config[CONF_VENTILATION])
         cg.add(sw.set_parent(var))
         cg.add(var.set_ventilation_switch(sw))
+    if CONF_POWER_SWITCH in config:
+        sw = await switch.new_switch(config[CONF_POWER_SWITCH])
+        cg.add(sw.set_parent(var))
+        cg.add(var.set_power_switch(sw))
     if CONF_POWER_LEVEL in config:
         num = await number.new_number(
             config[CONF_POWER_LEVEL],

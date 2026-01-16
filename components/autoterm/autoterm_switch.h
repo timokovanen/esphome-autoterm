@@ -19,5 +19,14 @@ class VentilationSwitch : public switch_::Switch, public Parented<AUTOTerm> {
   static const char *const TAG;
 };
 
+class PowerSwitch : public switch_::Switch, public Parented<AUTOTerm> {
+ public:
+  // PowerSwitch() = default;
+  void write_state(bool state) override;
+ 
+ protected:
+  static const char *const TAG;
+};
+
 } // namespace autoterm
 } // namespace esphome

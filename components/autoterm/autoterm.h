@@ -8,11 +8,9 @@
 #include "esphome/components/mqtt/mqtt_client.h"
 #endif
 
-#ifdef USE_TEXT_SENSOR
-#include "esphome/components/text_sensor/text_sensor.h"
-#endif
-
 #include "esphome/components/sensor/sensor.h"
+#include "esphome/components/text_sensor/text_sensor.h"
+
 #include "autoterm_switch.h"
 #include "autoterm_number.h"
 #include "autoterm_select.h"
@@ -58,7 +56,7 @@ class AUTOTerm : public Component {
   void set_operating_state_sensor(text_sensor::TextSensor *sensor) { operating_state_sensor_ = sensor; }
   void set_operating_mode_select(select::Select *s) { this->operating_mode_select_ = s; }
   void set_ventilation_switch(switch_::Switch *sw) { this->ventilation_switch_ = sw; }
-
+  void set_power_switch(switch_::Switch *sw) { this->power_switch_ = sw; }
   void set_temperature_setpoint_number(number::Number *num) { this->temperature_setpoint_number_ = num; }
   void apply_temperature_setpoint(uint8_t setpoint);  // called by the number child
   void set_power_level_number(number::Number *num) { this->power_level_number_ = num; }
@@ -111,6 +109,7 @@ class AUTOTerm : public Component {
   sensor::Sensor *battery_voltage_sensor_{nullptr};
   text_sensor::TextSensor *operating_state_sensor_{nullptr};
   select::Select *operating_mode_select_{nullptr};
+  switch_::Switch *power_switch_{nullptr};
   switch_::Switch *ventilation_switch_{nullptr};
   number::Number *temperature_setpoint_number_{nullptr};
   number::Number *power_level_number_{nullptr};
@@ -130,7 +129,7 @@ class AUTOTerm : public Component {
   void update_sensors_();
   const char* state_to_string_(uint8_t state);
   const char* mode_to_string_(uint8_t mode);
-  bool vent_to_binary_(uint8_t vent);
+  // bool vent_to_binary_(uint8_t vent);
   static const char *const TAG;
 };
 

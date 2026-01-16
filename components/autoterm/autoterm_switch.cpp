@@ -10,5 +10,9 @@ void VentilationSwitch::write_state(bool state) {
   this->publish_state(state);
 }
 
+void PowerSwitch::write_state(bool state) {
+  this->publish_state(state);
+}
+
 }  // namespace autoterm
 }  // namespace esphome

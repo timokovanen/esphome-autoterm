@@ -79,5 +79,5 @@ autoterm:
     name: "Operating Mode"
   ventilation:
     name: "Ventilation"
-
-text_sensor:
+  power_switch:
+    name: "Heater Power Switch"
