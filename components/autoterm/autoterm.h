@@ -69,6 +69,7 @@ class AUTOTerm : public Component {
   void set_ventilation_switch(switch_::Switch *sw) { this->ventilation_switch_ = sw; }
   void set_power_switch(switch_::Switch *sw) { this->power_switch_ = sw; }
   void apply_ventilation(bool state);
+  void apply_power(bool state);
 
   // --- number setters --
   void set_temperature_setpoint_number(number::Number *num) { this->temperature_setpoint_number_ = num; }

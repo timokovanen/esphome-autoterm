@@ -12,25 +12,19 @@ class AUTOTerm;
 
 class PowerLevelNumber : public number::Number, public Parented<AUTOTerm> {
  public:
-  // Called when the user/API sets a new value
-  void control(float value) override;
-
-  // Helper to let parent publish updates (e.g., readback from hardware)
   void report(float value) { this->publish_state(value); }
 
  protected:
+  void control(float value) override;
   static const char *const TAG;
 };
 
 class TemperatureSetpointNumber : public number::Number, public Parented<AUTOTerm> {
  public:
-  // Called when the user/API sets a new value
-  void control(float value) override;
-
-  // Helper to let parent publish updates (e.g., readback from hardware)
   void report(float value) { this->publish_state(value); }
 
  protected:
+  void control(float value) override;
   static const char *const TAG;
 };
 

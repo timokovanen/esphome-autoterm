@@ -329,6 +329,16 @@ void AUTOTerm::apply_operating_mode(const std::string &value) {
   }
 }
 
+void AUTOTerm::apply_power(bool state) {
+  if (state) {
+    if (this->autoterm_operating_state_ != STATE_OFF) return;
+    this->command_to_heater_(CMD_START, this->autoterm_operating_mode_, this->autoterm_temperature_setpoint_, this->autoterm_power_level_, this->autoterm_ventilation_);
+  } else {
+    if (this->autoterm_operating_state_ != STATE_OFF && this->autoterm_operating_state_ != STATE_VENTILATION) return;
+  }
+  ESP_LOGI(TAG, "Applied power = %d", state);
+}
+
 void AUTOTerm::update_sensors_() {
   if (heater_temperature_sensor_) {
     heater_temperature_sensor_->publish_state(autoterm_heater_temperature_);
