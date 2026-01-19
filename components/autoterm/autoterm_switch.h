@@ -11,20 +11,14 @@ namespace autoterm {
 class AUTOTerm;
 
 class VentilationSwitch : public switch_::Switch, public Parented<AUTOTerm> {
- public:
-  // VentilationSwitch() = default;
-  void write_state(bool state) override;
- 
  protected:
+  void write_state(bool state) override;
   static const char *const TAG;
 };
 
 class PowerSwitch : public switch_::Switch, public Parented<AUTOTerm> {
- public:
-  // PowerSwitch() = default;
-  void write_state(bool state) override;
- 
  protected:
+  void write_state(bool state) override;
   static const char *const TAG;
 };
 
