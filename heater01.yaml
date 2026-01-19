@@ -37,7 +37,7 @@ ota:
 
 external_components:
   - source: components
-
+  
 uart:
   - id: panel
     tx_pin: GPIO17
@@ -51,14 +51,14 @@ uart:
 autoterm:
   uart_panel: panel
   uart_heater: heater
-  # refresh_ms: 30000
-  # optional mqtt settings
+  ## optional settings
   # timeout_ms: 20
   # buffer_size: 32
-  # publish_topic: default to "${core.name}/autoterm"
-  # subscribe_topic: default to "${core.name}/autoterm/cmd"
   # refresh_ms: 30000
-  # optional sensors
+  ## optional mqtt_json settings
+  # publish_topic: default to "${core.name}/autoterm/state"
+  # subscribe_topic: default to "${core.name}/autoterm/command"
+  ## optional sensors and controls
   heater_temperature:
     name: "Heater Temperature"
   panel_temperature:
@@ -69,15 +69,15 @@ autoterm:
     name: "Battery Voltage"
   temperature_setpoint:
     name: "Temperature Setpoint"
+    mode: box
   power_level:
     name: "Power Level"
+    mode: slider
   operating_state:
     name: "Operating State"
   operating_mode:
     name: "Operating Mode"
   ventilation:
     name: "Ventilation"
-
-sensor:
-
-text_sensor:
+  power_switch:
+    name: "Heater Power Switch"

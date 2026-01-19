@@ -3,11 +3,18 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/uart/uart.h"
+
 #ifdef USE_MQTT
 #include "esphome/components/mqtt/mqtt_client.h"
 #endif
+
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/text_sensor/text_sensor.h"
+
+#include "autoterm_switch.h"
+#include "autoterm_number.h"
+#include "autoterm_select.h"
+
 #include <vector>
 #include <string>
 
@@ -20,12 +27,18 @@ class AUTOTerm : public Component {
   static const uint8_t PREAMBLE = 0xaa;
   static const uint8_t SENDER_PANEL = 0x03;
   static const uint8_t SENDER_HEATER = 0x04;
+  static const uint8_t MODE_BY_HEATER = 0x01;
+  static const uint8_t MODE_BY_PANEL = 0x02;
+  static const uint8_t MODE_BY_EXTERNAL = 0x03;
+  static const uint8_t MODE_BY_POWER = 0x04;
   static const uint8_t STATE_OFF = 0x00;
   static const uint8_t STATE_STARTING = 0x01;
   static const uint8_t STATE_RUNNING = 0x04;
   static const uint8_t STATE_SHUTTING_DOWN = 0x05;
   static const uint8_t STATE_TESTING = 0x06;
   static const uint8_t STATE_VENTILATION = 0x08;
+  static const uint8_t VENTILATION_ON = 0x01;
+  static const uint8_t VENTILATION_OFF = 0x02;
   static const uint8_t CMD_START = 0x01;
   static const uint8_t CMD_SET = 0x02;
   static const uint8_t CMD_SHUTDOWN = 0x03;
@@ -45,12 +58,24 @@ class AUTOTerm : public Component {
   void set_heater_temperature_sensor(sensor::Sensor *sensor) { heater_temperature_sensor_ = sensor; }
   void set_panel_temperature_sensor(sensor::Sensor *sensor) { panel_temperature_sensor_ = sensor; }
   void set_external_temperature_sensor(sensor::Sensor *sensor) { external_temperature_sensor_ = sensor; }
-  void set_battery_voltage_sensor(sensor::Sensor *sensor) { battery_voltage_sensor_ = sensor; }
-  void set_temperature_setpoint_sensor(sensor::Sensor *sensor) { temperature_setpoint_sensor_ = sensor; }
-  void set_power_level_sensor(sensor::Sensor *sensor) { power_level_sensor_ = sensor; }
+  void set_battery_voltage_sensor(sensor::Sensor *sensor) { this->battery_voltage_sensor_ = sensor; }
   void set_operating_state_sensor(text_sensor::TextSensor *sensor) { operating_state_sensor_ = sensor; }
-  void set_operating_mode_sensor(text_sensor::TextSensor *sensor) { operating_mode_sensor_ = sensor; }
-  void set_ventilation_sensor(text_sensor::TextSensor *sensor) { ventilation_sensor_ = sensor; }
+
+  // --- select setters --
+  void set_operating_mode_select(select::Select *s) { this->operating_mode_select_ = s; }
+  void apply_operating_mode(const std::string &value);
+
+  // --- switch setters --
+  void set_ventilation_switch(switch_::Switch *sw) { this->ventilation_switch_ = sw; }
+  void set_power_switch(switch_::Switch *sw) { this->power_switch_ = sw; }
+  void apply_ventilation(bool state);
+
+  // --- number setters --
+  void set_temperature_setpoint_number(number::Number *num) { this->temperature_setpoint_number_ = num; }
+  void set_power_level_number(number::Number *num) { this->power_level_number_ = num; }
+  void apply_temperature_setpoint(uint8_t temp_set);
+  void apply_power_level(uint8_t power);
+
   void setup() override;
   void loop() override;
   void dump_config() override;
@@ -95,11 +120,12 @@ class AUTOTerm : public Component {
   sensor::Sensor *panel_temperature_sensor_{nullptr};
   sensor::Sensor *external_temperature_sensor_{nullptr};
   sensor::Sensor *battery_voltage_sensor_{nullptr};
-  sensor::Sensor *temperature_setpoint_sensor_{nullptr};
-  sensor::Sensor *power_level_sensor_{nullptr};
   text_sensor::TextSensor *operating_state_sensor_{nullptr};
-  text_sensor::TextSensor *operating_mode_sensor_{nullptr};
-  text_sensor::TextSensor *ventilation_sensor_{nullptr};
+  select::Select *operating_mode_select_{nullptr};
+  switch_::Switch *power_switch_{nullptr};
+  switch_::Switch *ventilation_switch_{nullptr};
+  number::Number *temperature_setpoint_number_{nullptr};
+  number::Number *power_level_number_{nullptr};
 
   // --- helpers ---
   void read_from_(uart::UARTComponent *src, std::vector<uint8_t> &buf, uint32_t &last_rx);
@@ -110,13 +136,13 @@ class AUTOTerm : public Component {
   void publish_mqtt_();
   void on_json_message_(JsonObject &root);
 #endif
+  void command_to_heater_(uint8_t cmd, uint8_t mode, uint8_t temp_set, uint8_t power, uint8_t vent);
   void parse_message_(const std::vector<uint8_t> &buf);
   uint16_t crc16_modbus_(const uint8_t* data, size_t len);
   bool verify_crc16_modbus_(const std::vector<uint8_t> &buf);
   void update_sensors_();
   const char* state_to_string_(uint8_t state);
   const char* mode_to_string_(uint8_t mode);
-  const char* vent_to_string_(uint8_t vent);
   static const char *const TAG;
 };
 

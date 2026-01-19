@@ -12,6 +12,12 @@ void AUTOTerm::setup() {
   buf_panel_to_heater_.reserve(buffer_size_);
   buf_heater_to_panel_.reserve(buffer_size_);
   buf_autoterm_to_heater_.reserve(13);
+
+  // // Initialize to a sane default, publish once if we have the entity
+  // if (this->power_level_ != nullptr) {
+  //   this->power_level_cache_ = 0;
+  //   this->power_level_->publish_state(static_cast<float>(this->power_level_cache_));
+  // }
 }
 
 void AUTOTerm::read_from_(uart::UARTComponent *src, std::vector<uint8_t> &buf, uint32_t &last_rx) {
@@ -60,7 +66,7 @@ void AUTOTerm::publish_mqtt_() {
 
   mqtt::global_mqtt_client->publish(publish_topic_, payload);
 }
-
+  
 void AUTOTerm::on_json_message_(JsonObject &root) {
   if (root["cmd"] == nullptr || !root["cmd"].is<int>() || (root["cmd"] < 0x01) || (root["cmd"] > 0x03)) {
     ESP_LOGD(TAG, "invalid command format");
@@ -92,33 +98,7 @@ void AUTOTerm::on_json_message_(JsonObject &root) {
     vent = root["vent"].as<uint8_t>();
   }
 
-  uint16_t crc;
-
-  switch(cmd) {
-    case CMD_START: // start
-      if (this->autoterm_operating_state_ != STATE_OFF) return;
-      ESP_LOGD(TAG, "command start");
-      this->buf_autoterm_to_heater_.assign({ PREAMBLE, SENDER_PANEL, 0x06, 0x00, CMD_START, 0xff, 0xff, mode, temp_set, vent, power });
-      crc = this->crc16_modbus_(buf_autoterm_to_heater_.data(), buf_autoterm_to_heater_.size());
-      this->buf_autoterm_to_heater_.push_back(static_cast<uint8_t>(crc >> 8) & 0xff);
-      this->buf_autoterm_to_heater_.push_back(static_cast<uint8_t>(crc & 0xff));
-      this->send_command_ = true;
-      break;
-    case CMD_SET: // set settings
-      ESP_LOGD(TAG, "command set");
-      this->buf_autoterm_to_heater_.assign({ PREAMBLE, SENDER_PANEL, 0x06, 0x00, CMD_SET, 0xff, 0xff, mode, temp_set, vent, power });
-      crc = this->crc16_modbus_(buf_autoterm_to_heater_.data(), buf_autoterm_to_heater_.size());
-      this->buf_autoterm_to_heater_.push_back(static_cast<uint8_t>(crc >> 8) & 0xff);
-      this->buf_autoterm_to_heater_.push_back(static_cast<uint8_t>(crc & 0xff));
-      this->send_command_ = true;
-      break;
-    case CMD_SHUTDOWN: // shutdown
-      if (this->autoterm_operating_state_ != STATE_RUNNING && this->autoterm_operating_state_ != STATE_VENTILATION) return;
-      ESP_LOGD(TAG, "command shutdown");
-      this->buf_autoterm_to_heater_.assign({ PREAMBLE, SENDER_PANEL, 0x00, 0x00, CMD_SHUTDOWN, 0x5d, 0x7c });
-      this->send_command_ = true;
-      break;
-  }
+  command_to_heater_(cmd, mode, temp_set, power, vent);
 }
 
 void AUTOTerm::subscribe_mqtt_() {
@@ -256,6 +236,36 @@ bool AUTOTerm::verify_crc16_modbus_(const std::vector<uint8_t> &buf) {
     return computed == received;
 }
 
+void AUTOTerm::command_to_heater_(uint8_t cmd, uint8_t mode, uint8_t temp_set, uint8_t power, uint8_t vent) {
+  uint16_t crc;
+
+  switch(cmd) {
+    case CMD_START: // start
+      if (this->autoterm_operating_state_ != STATE_OFF) return;
+      ESP_LOGD(TAG, "command start");
+      this->buf_autoterm_to_heater_.assign({ PREAMBLE, SENDER_PANEL, 0x06, 0x00, CMD_START, 0xff, 0xff, mode, temp_set, vent, power });
+      crc = this->crc16_modbus_(buf_autoterm_to_heater_.data(), buf_autoterm_to_heater_.size());
+      this->buf_autoterm_to_heater_.push_back(static_cast<uint8_t>(crc >> 8) & 0xff);
+      this->buf_autoterm_to_heater_.push_back(static_cast<uint8_t>(crc & 0xff));
+      this->send_command_ = true;
+      break;
+    case CMD_SET: // set settings
+      ESP_LOGD(TAG, "command set");
+      this->buf_autoterm_to_heater_.assign({ PREAMBLE, SENDER_PANEL, 0x06, 0x00, CMD_SET, 0xff, 0xff, mode, temp_set, vent, power });
+      crc = this->crc16_modbus_(buf_autoterm_to_heater_.data(), buf_autoterm_to_heater_.size());
+      this->buf_autoterm_to_heater_.push_back(static_cast<uint8_t>(crc >> 8) & 0xff);
+      this->buf_autoterm_to_heater_.push_back(static_cast<uint8_t>(crc & 0xff));
+      this->send_command_ = true;
+      break;
+    case CMD_SHUTDOWN: // shutdown
+      if (this->autoterm_operating_state_ != STATE_RUNNING && this->autoterm_operating_state_ != STATE_VENTILATION) return;
+      ESP_LOGD(TAG, "command shutdown");
+      this->buf_autoterm_to_heater_.assign({ PREAMBLE, SENDER_PANEL, 0x00, 0x00, CMD_SHUTDOWN, 0x5d, 0x7c });
+      this->send_command_ = true;
+      break;
+  }
+}
+
 const char* AUTOTerm::state_to_string_(uint8_t state) {
   switch(state) {
     case STATE_OFF: return "off";
@@ -270,19 +280,52 @@ const char* AUTOTerm::state_to_string_(uint8_t state) {
 
 const char* AUTOTerm::mode_to_string_(uint8_t mode) {
   switch(mode) {
-    case 0x01: return "Heater sensor";
-    case 0x02: return "Panel sensor";
-    case 0x03: return "External sensor";
-    case 0x04: return "Power";
+    case MODE_BY_HEATER: return "By Heater";
+    case MODE_BY_PANEL: return "By Panel";
+    case MODE_BY_EXTERNAL: return "By External";
+    case MODE_BY_POWER: return "By Power";
     default: return "Unknown";
   }
 }
 
-const char* AUTOTerm::vent_to_string_(uint8_t vent) {
-  switch(vent) {
-    case 0x01: return "on";
-    case 0x02: return "off";
-    default: return "Unknown";
+void AUTOTerm::apply_ventilation(bool state) {
+  uint8_t vent;
+
+  if (state) {
+    vent = VENTILATION_ON;
+  } else {
+    vent = VENTILATION_OFF;
+  }
+  this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, this->autoterm_temperature_setpoint_, this->autoterm_power_level_, vent);
+  ESP_LOGI(TAG, "Applied ventilation = %d", vent);
+}
+
+void AUTOTerm::apply_power_level(uint8_t power) {
+  if (power < 0) power = 0;
+  if (power > 9) power = 9;
+  this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, this->autoterm_temperature_setpoint_, power, this->autoterm_ventilation_);
+  ESP_LOGI(TAG, "Applied power_level = %d", power);
+}
+
+void AUTOTerm::apply_temperature_setpoint(uint8_t temp_set) {
+  if (temp_set < 1) temp_set = 1;
+  if (temp_set > 30) temp_set = 30;
+  this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, temp_set, this->autoterm_power_level_, this->autoterm_ventilation_);
+  ESP_LOGI(TAG, "Applied temperature_setpoint = %d", temp_set);
+}
+
+void AUTOTerm::apply_operating_mode(const std::string &value) {
+  uint8_t mode;
+  if (value == "By Heater" || value == "By Panel" || value == "By External" || value == "By Power") {
+    if (value == "By Heater") mode = MODE_BY_HEATER;
+    else if (value == "By Panel") mode = MODE_BY_PANEL;
+    else if (value == "By External") mode = MODE_BY_EXTERNAL;
+    else if (value == "By Power") mode = MODE_BY_POWER;
+    this->command_to_heater_(CMD_SET, mode, this->autoterm_temperature_setpoint_, this->autoterm_power_level_, this->autoterm_ventilation_);
+  ESP_LOGI(TAG, "Applied operating_mode = %d", mode);
+  } else {
+    ESP_LOGW(TAG, "Unsupported operating mode value: %s", value.c_str());
+    return;
   }
 }
 
@@ -297,22 +340,25 @@ void AUTOTerm::update_sensors_() {
     external_temperature_sensor_->publish_state(autoterm_external_temperature_);
   }
   if (battery_voltage_sensor_) {
-    battery_voltage_sensor_->publish_state((float)autoterm_battery_voltage_ / 10.0f);
-  }
-  if (temperature_setpoint_sensor_) {
-    temperature_setpoint_sensor_->publish_state(autoterm_temperature_setpoint_);
-  }
-  if (power_level_sensor_) {
-    power_level_sensor_->publish_state(autoterm_power_level_);
+    this->battery_voltage_sensor_->publish_state(static_cast<float>(this->autoterm_battery_voltage_) / 10.0f);
   }
   if (operating_state_sensor_) {
     operating_state_sensor_->publish_state(state_to_string_(autoterm_operating_state_));
   }
-  if (operating_mode_sensor_) {
-    operating_mode_sensor_->publish_state(mode_to_string_(autoterm_operating_mode_));
+  if (operating_mode_select_) {
+    this->operating_mode_select_->publish_state(mode_to_string_(autoterm_operating_mode_));
   }
-  if (ventilation_sensor_) {
-    ventilation_sensor_->publish_state(vent_to_string_(autoterm_ventilation_));
+  if (ventilation_switch_) {
+    this->ventilation_switch_->publish_state(this->autoterm_ventilation_ == VENTILATION_ON);
+  }
+  if (temperature_setpoint_number_) {
+    this->temperature_setpoint_number_->publish_state(static_cast<float>(this->autoterm_temperature_setpoint_));
+  }
+  if (power_level_number_) {
+    this->power_level_number_->publish_state(static_cast<float>(this->autoterm_power_level_));
+  }
+  if (power_switch_) {
+    this->power_switch_->publish_state((this->autoterm_power_level_ == STATE_STARTING) || (this->autoterm_power_level_ == STATE_RUNNING) || (this->autoterm_power_level_ == STATE_VENTILATION));
   }
 }
 
@@ -327,7 +373,9 @@ void AUTOTerm::loop() {
   this->subscribe_mqtt_();
 #endif
   if(((uint32_t)(now - this->last_publish_) >= this->refresh_ms_) || this->autoterm_data_changed_) {
+#ifdef USE_SENSOR
     this->update_sensors_();
+#endif
 #ifdef USE_MQTT
     this->publish_mqtt_();
 #endif
