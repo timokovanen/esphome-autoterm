@@ -381,7 +381,7 @@ void AUTOTerm::update_sensors_() {
     this->power_level_number_->publish_state(static_cast<float>(this->autoterm_power_level_));
   }
   if (power_switch_) {
-    this->power_switch_->publish_state((this->autoterm_power_level_ == STATE_STARTING) || (this->autoterm_power_level_ == STATE_RUNNING) || (this->autoterm_power_level_ == STATE_VENTILATION));
+    this->power_switch_->publish_state((this->autoterm_operating_state_ == STATE_STARTING) || (this->autoterm_operating_state_ == STATE_RUNNING) || (this->autoterm_operating_state_ == STATE_VENTILATION));
   }
 }
 
