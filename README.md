@@ -13,7 +13,9 @@ Prototype with WT32-ETH01 & ADUM1201 as level shifters
         Green (TX)	- ADUM1201 VIB  - VOB	- ESP32 GPIO33 (RX)
         White (RX)	- ADUM1201 VOA	- VIA	- ESP32 GPIO32 (TX)
 
-MQTT JSON:
+Home Assistant integration with sensor, switch, select & number entities.
+
+Optional MQTT JSON report/control:
 
     "state" (operating state):
     0: off
@@ -71,7 +73,6 @@ TODO:
 
 * Get rid of magic numbers
 * Fine tune switch control
-* Make MQTT JSON optional
 * Integrate Home Assistant API
 * Change icons etc.
 
