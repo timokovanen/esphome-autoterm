@@ -4,7 +4,7 @@
 #include "esphome/components/switch/switch.h"
 #include "esphome/core/helpers.h"
 
-#include "autoterm.h" // for Parented<AUTOTerm>
+#include "autoterm.h"
 
 namespace esphome {
 namespace autoterm {

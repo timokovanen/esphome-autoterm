@@ -15,6 +15,8 @@ Prototype with WT32-ETH01 & ADUM1201 as level shifters
 
 Home Assistant integration with sensor, switch, select & number entities.
 
+Optional MQTT
+
 Optional MQTT JSON report/control:
 
     "state" (operating state):
@@ -72,7 +74,6 @@ Optional MQTT JSON report/control:
 TODO:
 
 * Get rid of magic numbers
-* Fine tune switch control
 * Integrate Home Assistant API
 * Change icons etc.
 
