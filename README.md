@@ -72,7 +72,7 @@ Optional MQTT JSON report/control:
 TODO:
 
 * Get rid of magic numbers
-* Fine tune switch control
+* Make mqtt optional
 * Integrate Home Assistant API
 * Change icons etc.
 
