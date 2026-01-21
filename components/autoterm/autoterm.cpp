@@ -49,7 +49,7 @@ void AUTOTerm::write_to_(uart::UARTComponent *dst, const std::vector<uint8_t> &b
 }
 
 #ifdef USE_MQTT
-void AUTOTerm::publish_mqtt_() {
+void AUTOTerm::publish_mqtt_json_() {
   if (!mqtt::global_mqtt_client || !mqtt::global_mqtt_client->is_connected()) return;
 
   std::string payload = esphome::json::build_json([&] ( JsonObject root) {
@@ -101,7 +101,7 @@ void AUTOTerm::on_json_message_(JsonObject &root) {
   command_to_heater_(cmd, mode, temp_set, power, vent);
 }
 
-void AUTOTerm::subscribe_mqtt_() {
+void AUTOTerm::subscribe_mqtt_json_() {
   bool connected = mqtt::global_mqtt_client && mqtt::global_mqtt_client->is_connected();
 
   if (!this->was_connected_ && connected) {
@@ -380,14 +380,14 @@ void AUTOTerm::loop() {
   this->maybe_flush_(buf_panel_to_heater_, uart_heater_, last_panel_rx_, "panel");
   this->maybe_flush_(buf_heater_to_panel_, uart_panel_, last_heater_rx_, "heater");
 #ifdef USE_MQTT
-  this->subscribe_mqtt_();
+  if (mqtt_json_enabled_) this->subscribe_mqtt_json_();
 #endif
   if(((uint32_t)(now - this->last_publish_) >= this->refresh_ms_) || this->autoterm_data_changed_) {
 #ifdef USE_SENSOR
     this->update_sensors_();
 #endif
 #ifdef USE_MQTT
-    this->publish_mqtt_();
+    if (mqtt_json_enabled_) this->publish_mqtt_json_();
 #endif
     this->last_publish_ = millis();
     this->autoterm_data_changed_ = false;

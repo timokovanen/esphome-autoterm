@@ -56,6 +56,7 @@ autoterm:
   # buffer_size: 32
   # refresh_ms: 30000
   ## optional mqtt_json settings
+  # mqtt_json_enabled: false
   # publish_topic: default to "${core.name}/autoterm/state"
   # subscribe_topic: default to "${core.name}/autoterm/command"
   ## optional sensors and controls
