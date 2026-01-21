@@ -288,9 +288,8 @@ const char* AUTOTerm::mode_to_string_(uint8_t mode) {
   }
 }
 
-void AUTOTerm::apply_ventilation(bool state) {
+bool AUTOTerm::apply_ventilation(bool state) {
   uint8_t vent;
-
   if (state) {
     vent = VENTILATION_ON;
   } else {
@@ -298,45 +297,59 @@ void AUTOTerm::apply_ventilation(bool state) {
   }
   this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, this->autoterm_temperature_setpoint_, this->autoterm_power_level_, vent);
   ESP_LOGI(TAG, "Applied ventilation = %d", vent);
+  return true;
 }
 
-void AUTOTerm::apply_power_level(uint8_t power) {
+bool AUTOTerm::apply_power_level(uint8_t power) {
   if (power < 0) power = 0;
   if (power > 9) power = 9;
   this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, this->autoterm_temperature_setpoint_, power, this->autoterm_ventilation_);
   ESP_LOGI(TAG, "Applied power_level = %d", power);
+  return true;
 }
 
-void AUTOTerm::apply_temperature_setpoint(uint8_t temp_set) {
+bool AUTOTerm::apply_temperature_setpoint(uint8_t temp_set) {
   if (temp_set < 1) temp_set = 1;
   if (temp_set > 30) temp_set = 30;
   this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, temp_set, this->autoterm_power_level_, this->autoterm_ventilation_);
   ESP_LOGI(TAG, "Applied temperature_setpoint = %d", temp_set);
+  return true;
 }
 
-void AUTOTerm::apply_operating_mode(const std::string &value) {
-  uint8_t mode;
-  if (value == "By Heater" || value == "By Panel" || value == "By External" || value == "By Power") {
-    if (value == "By Heater") mode = MODE_BY_HEATER;
-    else if (value == "By Panel") mode = MODE_BY_PANEL;
-    else if (value == "By External") mode = MODE_BY_EXTERNAL;
-    else if (value == "By Power") mode = MODE_BY_POWER;
-    this->command_to_heater_(CMD_SET, mode, this->autoterm_temperature_setpoint_, this->autoterm_power_level_, this->autoterm_ventilation_);
-  ESP_LOGI(TAG, "Applied operating_mode = %d", mode);
-  } else {
-    ESP_LOGW(TAG, "Unsupported operating mode value: %s", value.c_str());
-    return;
+bool AUTOTerm::apply_operating_mode(const std::string &value) {
+  
+  const bool valid = (
+    value == "By Heater" ||
+    value == "By Panel"  ||
+    value == "By External" ||
+    value == "By Power"
+  );
+
+  if (!valid) {
+    ESP_LOGW(TAG, "Unsupported operating_mode value: %s", value.c_str());
+    return false;
   }
+
+  uint8_t mode;
+  if (value == "By Heater") mode = MODE_BY_HEATER;
+  else if (value == "By Panel") mode = MODE_BY_PANEL;
+  else if (value == "By External") mode = MODE_BY_EXTERNAL;
+  else if (value == "By Power") mode = MODE_BY_POWER;
+  this->command_to_heater_(CMD_SET, mode, this->autoterm_temperature_setpoint_, this->autoterm_power_level_, this->autoterm_ventilation_);
+  ESP_LOGI(TAG, "Applied operating_mode = %d", mode);
+  return true;
 }
 
-void AUTOTerm::apply_power(bool state) {
+bool AUTOTerm::apply_power(bool state) {
   if (state) {
-    if (this->autoterm_operating_state_ != STATE_OFF) return;
+    if (this->autoterm_operating_state_ != STATE_OFF) return false;
     this->command_to_heater_(CMD_START, this->autoterm_operating_mode_, this->autoterm_temperature_setpoint_, this->autoterm_power_level_, this->autoterm_ventilation_);
   } else {
-    if (this->autoterm_operating_state_ != STATE_OFF && this->autoterm_operating_state_ != STATE_VENTILATION) return;
+    if (this->autoterm_operating_state_ != STATE_RUNNING && this->autoterm_operating_state_ != STATE_VENTILATION) return false;
+    this->command_to_heater_(CMD_SHUTDOWN, this->autoterm_operating_mode_, this->autoterm_temperature_setpoint_, this->autoterm_power_level_, this->autoterm_ventilation_);
   }
   ESP_LOGI(TAG, "Applied power = %d", state);
+  return true;
 }
 
 void AUTOTerm::update_sensors_() {
