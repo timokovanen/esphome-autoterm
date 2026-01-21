@@ -50,6 +50,7 @@ class AUTOTerm : public Component {
   void set_uart_heater(uart::UARTComponent *uart) { uart_heater_ = uart; }
   void set_timeout_ms(uint32_t timeout_ms) { timeout_ms_ = timeout_ms; }
   void set_buffer_size(size_t buffer_size) { buffer_size_ = buffer_size; }
+  void set_mqtt_json_enabled(bool enabled) { mqtt_json_enabled_ = enabled; }
   void set_publish_topic(const std::string &publish_topic) { publish_topic_ = publish_topic; }
   void set_subscribe_topic(const std::string &subscribe_topic) { subscribe_topic_ = subscribe_topic; }
   void set_refresh_ms(uint32_t refresh_ms) { refresh_ms_ = refresh_ms; }
@@ -87,6 +88,7 @@ class AUTOTerm : public Component {
   uart::UARTComponent *uart_heater_{nullptr};
   uint32_t timeout_ms_{20};
   size_t buffer_size_{256};
+  bool mqtt_json_enabled_{false};
   std::string publish_topic_;
   std::string subscribe_topic_;
   uint32_t refresh_ms_{30000};
@@ -133,8 +135,8 @@ class AUTOTerm : public Component {
   void maybe_flush_(std::vector<uint8_t> &buf, uart::UARTComponent *dst, uint32_t last_rx, const char *tag);
   void write_to_(uart::UARTComponent *dst, const std::vector<uint8_t> &buf, const char *tag);
 #ifdef USE_MQTT
-  void subscribe_mqtt_();
-  void publish_mqtt_();
+  void subscribe_mqtt_json_();
+  void publish_mqtt_json_();
   void on_json_message_(JsonObject &root);
 #endif
   void command_to_heater_(uint8_t cmd, uint8_t mode, uint8_t temp_set, uint8_t power, uint8_t vent);

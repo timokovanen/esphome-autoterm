@@ -44,6 +44,7 @@ CONF_UART_PANEL = "uart_panel"
 CONF_UART_HEATER = "uart_heater"
 CONF_TIMEOUT_MS = "timeout_ms"
 CONF_BUFFER_SIZE = "buffer_size"
+CONF_MQTT_JSON_ENABLED = "mqtt_json_enabled"
 CONF_PUBLISH_TOPIC = "publish_topic"
 CONF_SUBSCRIBE_TOPIC = "subscribe_topic"
 CONF_REFRESH_MS = "refresh_ms"
@@ -64,6 +65,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Required(CONF_UART_HEATER): cv.use_id(uart.UARTComponent),
     cv.Optional(CONF_TIMEOUT_MS, default=20): cv.int_range(min=1, max=2000),
     cv.Optional(CONF_BUFFER_SIZE, default=256): cv.int_range(min=16, max=4096),
+    cv.Optional(CONF_MQTT_JSON_ENABLED, default=False): cv.boolean,
     cv.Optional(CONF_PUBLISH_TOPIC): cv.string,
     cv.Optional(CONF_SUBSCRIBE_TOPIC): cv.string,
     cv.Optional(CONF_REFRESH_MS, default=30000): cv.int_range(min=5000, max=60000),
@@ -104,6 +106,7 @@ async def to_code(config):
     cg.add(var.set_uart_heater(uart_heater))
     cg.add(var.set_timeout_ms(config[CONF_TIMEOUT_MS]))
     cg.add(var.set_buffer_size(config[CONF_BUFFER_SIZE]))
+    cg.add(var.set_mqtt_json_enabled(config[CONF_MQTT_JSON_ENABLED]))
     publish_topic = config.get(CONF_PUBLISH_TOPIC, f"{CORE.name}/autoterm/state")
     cg.add(var.set_publish_topic(cg.std_string(publish_topic)))
     subscribe_topic = config.get(CONF_SUBSCRIBE_TOPIC, f"{CORE.name}/autoterm/command")
