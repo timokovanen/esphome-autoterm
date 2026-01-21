@@ -396,9 +396,7 @@ void AUTOTerm::loop() {
   if (mqtt_json_enabled_) this->subscribe_mqtt_json_();
 #endif
   if(((uint32_t)(now - this->last_publish_) >= this->refresh_ms_) || this->autoterm_data_changed_) {
-#ifdef USE_SENSOR
     this->update_sensors_();
-#endif
 #ifdef USE_MQTT
     if (mqtt_json_enabled_) this->publish_mqtt_json_();
 #endif
@@ -411,10 +409,11 @@ void AUTOTerm::dump_config(){
   ESP_LOGCONFIG(TAG, "AUTOTerm");
   ESP_LOGCONFIG(TAG, "  timeout_ms = %i", this->timeout_ms_);
   ESP_LOGCONFIG(TAG, "  buffer_size = %i", this->buffer_size_);
+  ESP_LOGCONFIG(TAG, "  refresh_ms = %i", this->refresh_ms_);
 #ifdef USE_MQTT
+  ESP_LOGCONFIG(TAG, "  mqtt_json_enabled = %s", this->mqtt_json_enabled_ ? "True" : "False");
   ESP_LOGCONFIG(TAG, "  publish_topic = %s", this->publish_topic_.c_str());
   ESP_LOGCONFIG(TAG, "  subscribe_topic = %s", this->subscribe_topic_.c_str());
-  ESP_LOGCONFIG(TAG, "  refresh_ms = %i", this->refresh_ms_);
 #endif
 }
 
