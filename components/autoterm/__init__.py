@@ -2,8 +2,17 @@ import gc
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import uart, sensor, text_sensor, switch, number, select
-from esphome.const import CONF_ID, UNIT_CELSIUS, UNIT_VOLT, DEVICE_CLASS_TEMPERATURE, DEVICE_CLASS_VOLTAGE
 from esphome.core import CORE
+from esphome.const import (
+    CONF_ID,
+    UNIT_CELSIUS,
+    UNIT_VOLT,
+    DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_VOLTAGE,
+    ICON_FAN,
+    ICON_THERMOMETER,
+    ICON_POWER
+)
 
 AUTO_LOAD = ["sensor", "text_sensor", "switch", "number", "select"]
 
@@ -89,12 +98,29 @@ CONFIG_SCHEMA = cv.Schema({
         accuracy_decimals=1,
         device_class=DEVICE_CLASS_VOLTAGE
     ),
-    cv.Optional(CONF_TEMPERATURE_SETPOINT): number.number_schema(TemperatureSetpointNumber),
-    cv.Optional(CONF_POWER_LEVEL): number.number_schema(PowerLevelNumber),
-    cv.Optional(CONF_OPERATING_STATE): text_sensor.text_sensor_schema(),
-    cv.Optional(CONF_OPERATING_MODE): select.select_schema(ModeSelect),
-    cv.Optional(CONF_VENTILATION): switch.switch_schema(VentilationSwitch),
-    cv.Optional(CONF_POWER_SWITCH): switch.switch_schema(PowerSwitch),
+    cv.Optional(CONF_TEMPERATURE_SETPOINT): number.number_schema(
+        TemperatureSetpointNumber,
+        icon=ICON_THERMOMETER
+    ),
+    cv.Optional(CONF_POWER_LEVEL): number.number_schema(
+        PowerLevelNumber,
+        icon="mdi:lightning-bolt"
+    ),
+    cv.Optional(CONF_OPERATING_STATE): text_sensor.text_sensor_schema(
+        icon="mdi:information-outline"
+    ),
+    cv.Optional(CONF_OPERATING_MODE): select.select_schema(
+        ModeSelect,
+        icon="mdi:heat-wave"
+    ),
+    cv.Optional(CONF_VENTILATION): switch.switch_schema(
+        VentilationSwitch,
+        icon=ICON_FAN
+    ),
+    cv.Optional(CONF_POWER_SWITCH): switch.switch_schema(
+        PowerSwitch,
+        icon=ICON_POWER
+    ),
 }).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
