@@ -20,8 +20,8 @@ ethernet:
   phy_addr: 1
   power_pin: GPIO16
 
-# logger:
-#   level: DEBUG
+logger:
+  level: INFO
   
 mqtt:
   broker: 192.168.1.2
@@ -43,6 +43,7 @@ uart:
     tx_pin: GPIO17
     rx_pin: GPIO05
     baud_rate: 2400
+
   - id: heater
     tx_pin: GPIO32
     rx_pin: GPIO33
@@ -51,34 +52,46 @@ uart:
 autoterm:
   uart_panel: panel
   uart_heater: heater
-  ## optional settings
+
+  # Optional settings
   # timeout_ms: 20
   # buffer_size: 32
   # refresh_ms: 30000
-  ## optional mqtt_json settings
-  # mqtt_json_enabled: false
-  # publish_topic: default to "${core.name}/autoterm/state"
-  # subscribe_topic: default to "${core.name}/autoterm/command"
-  ## optional sensors and controls
+
+  # Optional MQTT JSON settings (enable if you want JSON pub/sub)
+  # mqtt_json_enabled: true
+  # publish_topic: "heater01/autoterm/state"
+  # subscribe_topic: "heater01/autoterm/command"
+
+  # Optional sensors and controls
   heater_temperature:
     name: "Heater Temperature"
+
   panel_temperature:
     name: "Panel Temperature"
+
   external_temperature:
     name: "External Temperature"
+
   battery_voltage:
     name: "Battery Voltage"
+
   temperature_setpoint:
     name: "Temperature Setpoint"
     mode: box
+
   power_level:
     name: "Power Level"
     mode: slider
+
   operating_state:
     name: "Operating State"
+
   operating_mode:
     name: "Operating Mode"
   ventilation:
+
     name: "Ventilation"
+
   power_switch:
     name: "Heater Power Switch"
