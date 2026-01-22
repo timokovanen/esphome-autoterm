@@ -24,6 +24,13 @@ namespace autoterm {
 class AUTOTerm : public Component {
  public:
 
+  static const uint8_t BUF_AUTOTERM_TO_HEATER_SIZE = 13;
+
+  static const uint8_t MIN_POWER_LEVEL = 0;
+  static const uint8_t MAX_POWER_LEVEL = 9;
+  static const uint8_t MIN_TEMPERATURE_SETPOINT = 1;
+  static const uint8_t MAX_TEMPERATURE_SETPOINT = 30;
+
   static const uint8_t PREAMBLE = 0xaa;
   static const uint8_t SENDER_PANEL = 0x03;
   static const uint8_t SENDER_HEATER = 0x04;

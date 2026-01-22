@@ -11,7 +11,7 @@ void AUTOTerm::setup() {
   ESP_LOGCONFIG(TAG, "Setting up AUTOTerm...");
   buf_panel_to_heater_.reserve(buffer_size_);
   buf_heater_to_panel_.reserve(buffer_size_);
-  buf_autoterm_to_heater_.reserve(13);
+  buf_autoterm_to_heater_.reserve(BUF_AUTOTERM_TO_HEATER_SIZE);
 
   // // Initialize to a sane default, publish once if we have the entity
   // if (this->power_level_ != nullptr) {
@@ -301,16 +301,16 @@ bool AUTOTerm::apply_ventilation(bool state) {
 }
 
 bool AUTOTerm::apply_power_level(uint8_t power) {
-  if (power < 0) power = 0;
-  if (power > 9) power = 9;
+  if (power < MIN_POWER_LEVEL) power = MIN_POWER_LEVEL;
+  if (power > MAX_POWER_LEVEL) power = MAX_POWER_LEVEL;
   this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, this->autoterm_temperature_setpoint_, power, this->autoterm_ventilation_);
   ESP_LOGI(TAG, "Applied power_level = %d", power);
   return true;
 }
 
 bool AUTOTerm::apply_temperature_setpoint(uint8_t temp_set) {
-  if (temp_set < 1) temp_set = 1;
-  if (temp_set > 30) temp_set = 30;
+  if (temp_set < MIN_TEMPERATURE_SETPOINT) temp_set = MIN_TEMPERATURE_SETPOINT;
+  if (temp_set > MAX_TEMPERATURE_SETPOINT) temp_set = MAX_TEMPERATURE_SETPOINT;
   this->command_to_heater_(CMD_SET, this->autoterm_operating_mode_, temp_set, this->autoterm_power_level_, this->autoterm_ventilation_);
   ESP_LOGI(TAG, "Applied temperature_setpoint = %d", temp_set);
   return true;
