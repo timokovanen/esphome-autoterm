@@ -1,4 +1,4 @@
-This [ESPHome] (https://esphome.io/) External Component allows to monitor and control Autoterm/Planar Diesel Air Heaters from within [Home Assistant](https://www.home-assistant.io/).
+This [ESPHome](https://esphome.io/) External Component allows to monitor and control Autoterm/Planar Diesel Air Heaters from within [Home Assistant](https://www.home-assistant.io/).
 
 ## Features
 - Heater On/Off
@@ -20,7 +20,8 @@ This [ESPHome] (https://esphome.io/) External Component allows to monitor and co
 - Autoterm Air 2D & 4D (Planar 2D & 44D)
 
 ## Wiring
-!!! Logic level shifters required. Heater uses 5V logic level, ESP32 3.3V !!!  
+> [!CAUTION]
+> Logic level shifters required. Heater uses 5V logic level, ESP32 3.3V !  
 
 <details><summary>Prototype with WT32-ETH01 & ADUM1201 as level shifters</summary>
 
