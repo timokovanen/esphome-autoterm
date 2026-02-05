@@ -1,11 +1,28 @@
-# ESPHome AUTOTerm External Component
-External ESPHome component for ESP32 to interface with Autoterm Diesel Air Heaters.
+This [ESPHome] (https://esphome.io/) External Component allows to monitor and control Autoterm/Planar Diesel Air Heaters from within [Home Assistant](https://www.home-assistant.io/).
 
-!!! Logic level shifters required. Heater uses 5V logic level, ESP32 3.3V !!!  
+## Features
+- Heater On/Off
+- Operating mode
+  - By Heater temperature sensor
+  - By Control Panel temperature sensor
+  - By External temperature sensor
+  - By Power
+- Power level
+- Temperature setpoint
+- Ventilation On/Off
+- Temperature sensors
+  - Heater
+  - Control Panel
+  - External
+- Battery voltage
 
-Prototype with WT32-ETH01 & ADUM1201 as level shifters
+## Supported Devices
+- Autoterm Air 2D & 4D (Planar 2D & 44D)
 
 ## Wiring
+!!! Logic level shifters required. Heater uses 5V logic level, ESP32 3.3V !!!  
+
+<details><summary>Prototype with WT32-ETH01 & ADUM1201 as level shifters</summary>
 
 ### Control Panel
 ```
@@ -18,9 +35,9 @@ Panel White (TX)  → ADUM1201 VIB → VOB → ESP32 GPIO05 (RX)
 Heater Green (TX) → ADUM1201 VIB → VOB → ESP32 GPIO33 (RX)
 Heater White (RX) → ADUM1201 VOA → VIA → ESP32 GPIO32 (TX)
 ```
+</details>
 
-# Home Assistant Integration
-
+## Home Assistant Integration with Native API
 This component exposes:
 - Heater, panel, external temperature sensors
 - Battery voltage sensor
@@ -31,10 +48,10 @@ This component exposes:
 - Heater power (Switch)
 - Operating state (Text sensor)
 
-# Optional MQTT
+## Optional MQTT
 Optionally enable MQTT for basic integration.
 
-# Optional MQTT JSON Interface
+<details><summary>Optional MQTT JSON Interface</summary>
 
 ### State Codes
 ```
@@ -88,13 +105,13 @@ Examples:
 {"cmd":2,"mode":3,"temp_set":22}
 {"cmd":3}
 ```
+</details>
 
-# TODO
+## TODO
 - Replace magic numbers with enums
-- Integrate Home Assistant Climate entity
 
-# Credits
-https://grimoire314.wordpress.com/2018/08/22/planar-diesel-heater-controller-reverse-engineering/
-https://grimoire314.wordpress.com/2019/03/21/autoterm-planar-diesel-heater-controller-reverse-engineering-part-2/
-https://helloworld.schlussdienst.net/blog/hacking-autoterm-planar-2d
-https://github.com/csreades/AutothermDieselRepeater
+## Thanks to
+- https://grimoire314.wordpress.com/2018/08/22/planar-diesel-heater-controller-reverse-engineering/ 
+- https://grimoire314.wordpress.com/2019/03/21/autoterm-planar-diesel-heater-controller-reverse-engineering-part-2/
+- https://helloworld.schlussdienst.net/blog/hacking-autoterm-planar-2d
+- https://github.com/csreades/AutothermDieselRepeater
