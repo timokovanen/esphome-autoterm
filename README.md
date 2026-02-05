@@ -111,6 +111,16 @@ Examples:
 ## TODO
 - Replace magic numbers with enums
 
+
+## Disclaimer
+> [!WARNING]
+> This project is provided “AS IS” without any warranty of any kind.  
+> You use this software at your own risk.  
+> The authors and contributors are not responsible for any damage, malfunction,  
+> injury, or legal issues resulting from the use of this code.
+>
+> For full legal terms, see the Apache-2.0 license included in this repository.
+
 ## Thanks to
 - https://grimoire314.wordpress.com/2018/08/22/planar-diesel-heater-controller-reverse-engineering/ 
 - https://grimoire314.wordpress.com/2019/03/21/autoterm-planar-diesel-heater-controller-reverse-engineering-part-2/
